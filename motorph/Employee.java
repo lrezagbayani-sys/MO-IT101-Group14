@@ -1,44 +1,66 @@
 package com.mycompany.motorph;
 
-//import java.time.LocalDate; (Found online, testing)
+//import java.time.LocalDate; (Will add local date lines later)
 
 public class Employee {
     int employeeNum;
     String firstName;
     String lastName;
-    //LocalDate birthday; (Same as import)
+    //LocalDate birthday; (We'll add this function)
     String phoneNum;
     String sssNum;
-    String healthNum;
+    String phNum;
     String tinNum;
     String ibigNum;
     boolean isRegular;
     Roles role; 
     String supervisor;
-    int basicSalary;
-    int riceSubsidy;
-    int phoneAllowance;
-    int clothAllowance;
-    int grossRate;
-    int hourlyRate;
+    //int basicSalary;
+    //int riceSubsidy;
+    //int phoneAllowance;
+    //int clothAllowance;
+    //int grossRate;
+    //int hourlyRate;
     
-    public Employee(int employeeNum, String firstName, String lastName, Roles role, String phoneNum, boolean isRegular) {
+    public Employee(
+            int employeeNum, 
+            String firstName, 
+            String lastName, 
+            String phoneNum, 
+            String sssNum,
+            String phNum,
+            String tinNum,
+            String ibigNum,
+            boolean isRegular,
+            Roles role, 
+            String supervisor) {
         this.employeeNum = employeeNum;
         this.firstName = firstName;
         this.lastName = lastName;
         // this.birthday = LocalDate.of(Month, Day, Year);
-        this.role = role;
         this.phoneNum = phoneNum; 
+        this.sssNum = sssNum;
+        this.phNum = phNum;
+        this.tinNum = tinNum;
+        this. ibigNum = ibigNum;
         this.isRegular = isRegular;
+        this.role = role;
+        this.supervisor = supervisor;
     }
 
-   
     public void displayInfo() {
-        System.out.println("Employee Number: " + employeeNum);
-        System.out.println("Name: " + firstName + " " + lastName);
-        // System.out.println("Birthday: " + birthday);
-        System.out.println("Role: " + role);
-        System.out.println("Phone: " + phoneNum);
-        System.out.println("Status: " + (isRegular ? "Regular" : "Probationary"));
+        System.out.printf(
+            "%-12d %-20s %-20s %-20s %-20s %-20s %-20s %-20s %-20s %-20s%n",
+            employeeNum,
+            firstName + " " + lastName,
+            phoneNum,
+            sssNum,
+            phNum,
+            tinNum,
+            ibigNum,
+            isRegular ? "Regular" : "Probationary",
+            role,
+            supervisor
+        );
     }
 }

@@ -1,0 +1,26 @@
+Hello Group! Heres some instructions for things to note and do
+
+>Project file is currently set Java App (In Maven)
+>Currently using JDK 21 due to instructions
+
+
+Setting up JDK 21
+1. Go to Oracle.com and download the JDK 21
+2. Go to Apachenetbeans, on the tool tab
+3. Enter Java Platforms -> Add Platform
+4. Direct it to your installed JDK file
+5. Go to project's POM.xmi file found under Project Files
+6. Under properties, look for maven.compiler.release and change 25 to 21
+7. Save the file
+
+Setting up Apache POI (Only for Maven)
+1. Go to the pom.xmi file 
+2. Add the following code
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.5.1</version>
+        </dependency>
+    </dependencies>
+3. Right Click on your Project  on the right side, press clean and build

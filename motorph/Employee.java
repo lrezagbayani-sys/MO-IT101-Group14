@@ -1,30 +1,5 @@
 package com.mycompany.motorph;
 
-package com.mycompany.motorph;
-
-public class Employee { //this is the main employee role, refer to Roles.java for enum primitive
-    int employeeNum;
-    String firstName;
-    String lastName;
-
-    public Employee(int 
-            employeeNum, 
-            String firstName, String lastName) {
-        this.employeeNum = employeeNum;
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
-
-    public void displayInfo() {
-        System.out.printf(
-            "%-12d %-20s%n",
-            employeeNum,
-            firstName + " " + lastName
-        );
-    }
-}
-
-/*
 public class Employee {
     int employeeNum;
     String firstName;
@@ -87,4 +62,5 @@ public class Employee {
         );
     }
 }
-*/
+
+

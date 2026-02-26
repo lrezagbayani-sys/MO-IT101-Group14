@@ -4,63 +4,35 @@ public class Employee {
     int employeeNum;
     String firstName;
     String lastName;
-    //LocalDate birthday; (We'll add this function)
-    String phoneNum;
-    String sssNum;
+    int birthDay;
+    int birthMonth;
+    int birthYear;
+    String phoneNum; //String since leading 0 are removed by int
+    String sssNum; //From sssNum to ibigNum, string is used because of too long integers or dashes(-)
     String phNum;
     String tinNum;
     String ibigNum;
-    boolean isRegular;
-    Roles role; 
+    boolean isRegular; //Boolean where Regular = True | Probitionary = False
+    String roles;
     String supervisor;
     //int basicSalary;
     //int riceSubsidy;
     //int phoneAllowance;
     //int clothAllowance;
     //int grossRate;
-    //int hourlyRate;
-    
-    public Employee(
-            int employeeNum, 
-            String firstName, 
-            String lastName, 
-            String phoneNum, 
-            String sssNum,
-            String phNum,
-            String tinNum,
-            String ibigNum,
-            boolean isRegular,
-            Roles role, 
-            String supervisor) {
-        this.employeeNum = employeeNum;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        // this.birthday = LocalDate.of(Month, Day, Year);
-        this.phoneNum = phoneNum; 
-        this.sssNum = sssNum;
-        this.phNum = phNum;
-        this.tinNum = tinNum;
-        this. ibigNum = ibigNum;
-        this.isRegular = isRegular;
-        this.role = role;
-        this.supervisor = supervisor;
-    }
+    double hourlyRate; 
 
     public void displayInfo() {
-        System.out.printf(
-            "%-12d %-20s %-20s %-20s %-20s %-20s %-20s %-20s %-20s %-20s%n",
-            employeeNum,
-            firstName + " " + lastName,
-            phoneNum,
-            sssNum,
-            phNum,
-            tinNum,
-            ibigNum,
-            isRegular ? "Regular" : "Probationary",
-            role,
-            supervisor
-        );
+        System.out.println("Employee #: " + employeeNum);
+        System.out.println("Name: " + firstName + " " + lastName);
+        System.out.println("Birthdate: " + birthMonth + "/" + birthDay + "/" + birthYear);
+        System.out.println("Phone: " + phoneNum);
+        System.out.println("SSS: " + sssNum);
+        System.out.println("PhilHealth: " + phNum);
+        System.out.println("TIN: " + tinNum);
+        System.out.println("Pag-IBIG: " + ibigNum);
+        System.out.println("Status: " + (isRegular ? "Regular" : "Probationary"));
+        System.out.println("Role: " + roles);
+        System.out.println("Supervisor: " + supervisor);
     }
 }
-
-

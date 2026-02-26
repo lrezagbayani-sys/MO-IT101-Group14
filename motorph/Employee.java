@@ -15,7 +15,7 @@ public class Employee {
     boolean isRegular; //Boolean where Regular = True | Probitionary = False
     String roles;
     String supervisor;
-    //int basicSalary;
+    //int basicSalary; //Unknown what to do here since need to translate String to Int
     //int riceSubsidy;
     //int phoneAllowance;
     //int clothAllowance;
@@ -36,3 +36,4 @@ public class Employee {
         System.out.println("Supervisor: " + supervisor);
     }
 }
+

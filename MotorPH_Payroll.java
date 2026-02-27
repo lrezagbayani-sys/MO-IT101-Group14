@@ -72,7 +72,7 @@ public class MotorPH_Payroll {
         String choice = input.nextLine();
 
         if (choice.equals("1")) {
-            System.out.println("\nPROCESSS PAYROLL OPTIONS:");
+            System.out.println("\nPROCESS PAYROLL OPTIONS:");
             System.out.println("1. One employee\n2. All employees\n3. Exit");
             System.out.print("Select: ");
             String subChoice = input.nextLine();

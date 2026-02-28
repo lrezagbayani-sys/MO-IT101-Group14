@@ -44,7 +44,7 @@ public class MotorPH_Payroll_Final {
 
         if (choice.equals("1")) {
             System.out.print("Enter Employee Number: ");
-            searchAndDisplay(input.nextLine());
+            displayStaffView(input.nextLine());
         } else if (choice.equals("2")) {
             processAll();
         } else {
@@ -63,47 +63,65 @@ public class MotorPH_Payroll_Final {
 
         if (choice.equals("1")) {
             System.out.print("Enter Your Employee Number: ");
-            searchAndDisplay(input.nextLine());
+            displayEmployeeView(input.nextLine());
         } else {
             System.out.println("\nThank you for using the MotorPH Payroll System!");
             System.out.println("Program Terminated.");
         }
     }
 
-    public static void searchAndDisplay(String id) {
+    // ONLY SHOWS BASIC INFO - FOR EMPLOYEES
+    public static void displayEmployeeView(String id) {
         try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
             String line;
-            br.readLine(); // Skip header
+            br.readLine(); 
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
                 if (data[1].trim().equals(id.trim())) {
-                    
-                    // Basic Info
+                    System.out.println("\n--- Employee Records ---");
+                    System.out.println("Employee #: " + data[1]);
+                    System.out.println("2. Employee Name: " + data[2]);
+                    System.out.println("3. Birthday: " + data[3]);
+                    System.out.println("\nThank you for using the MotorPH Payroll System!");
+                    System.out.println("Program Terminated.");
+                    return;
+                }
+            }
+            System.out.println("\nAccess Denied: Employee # does not exist.");
+            System.out.println("Program Terminated.");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    // SHOWS FULL PAYROLL 1-17 - FOR STAFF ONLY
+    public static void displayStaffView(String id) {
+        try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
+            String line;
+            br.readLine(); 
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                if (data[1].trim().equals(id.trim())) {
                     System.out.println("\n--- Employee Records ---");
                     System.out.println("1. Employee #: " + data[1]);
                     System.out.println("2. Employee Name: " + data[2]);
                     System.out.println("3. Birthday: " + data[3]);
 
-                    // Calculations
                     double rate = Double.parseDouble(data[16].replace("\"", "").replace(",", ""));
                     double totalHours = Double.parseDouble(data[15].replace("\"", "").replace(",", ""));
                     double halfHours = totalHours / 2;
                     double grossHalf = rate * halfHours;
-                    
+
                     double sss = Double.parseDouble(data[7].replace("\"", "").replace(",", ""));
                     double phil = Double.parseDouble(data[8].replace("\"", "").replace(",", ""));
                     double pagibig = Double.parseDouble(data[9].replace("\"", "").replace(",", ""));
                     double tax = Double.parseDouble(data[10].replace("\"", "").replace(",", ""));
                     double totalDeductions = sss + phil + pagibig + tax;
-                    double netSecondPayout = grossHalf - totalDeductions;
 
-                    // FIRST CUTOFF DISPLAY
                     System.out.println("4. Cutoff Date: June 1 to June 15");
                     System.out.println("5. Total Hours Worked: " + String.format("%.2f", halfHours));
                     System.out.println("6. Gross Salary: PHP " + String.format("%.2f", grossHalf));
                     System.out.println("7. Net Salary: PHP " + String.format("%.2f", grossHalf));
-
-                    // SECOND CUTOFF DISPLAY
                     System.out.println("8. Cutoff Date: June 16 to June 30 (Second payout includes all deductions)");
                     System.out.println("9. Total Hours Worked: " + String.format("%.2f", halfHours));
                     System.out.println("10. Gross Salary: PHP " + String.format("%.2f", grossHalf));
@@ -113,14 +131,14 @@ public class MotorPH_Payroll_Final {
                     System.out.println("14.   Pag-IBIG: PHP " + data[9].replace("\"", ""));
                     System.out.println("15.   Tax: PHP " + data[10].replace("\"", ""));
                     System.out.println("16. Total Deductions: PHP " + String.format("%.2f", totalDeductions));
-                    System.out.println("17. Net Salary: PHP " + String.format("%.2f", netSecondPayout));
+                    System.out.println("17. Net Salary: PHP " + String.format("%.2f", (grossHalf - totalDeductions)));
 
                     System.out.println("\nComputation Successful. Thank you for using the MotorPH Payroll System!");
                     System.out.println("Program Terminated.");
                     return;
                 }
             }
-            System.out.println("\nAccess Denied: Employee # does not exist. Please try again.");
+            System.out.println("\nAccess Denied: Employee # does not exist.");
             System.out.println("Program Terminated.");
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -128,8 +146,7 @@ public class MotorPH_Payroll_Final {
     }
 
     public static void processAll() {
-        // Option 2 implementation (Batch processing)
         System.out.println("\nProcessing all records...");
-        // Logic for all can follow similar format if needed
+        // This can call displayStaffView in a loop if needed
     }
 }

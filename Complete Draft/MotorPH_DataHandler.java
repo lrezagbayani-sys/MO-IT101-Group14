@@ -6,9 +6,7 @@ public static void searchAndDisplayEmployee(String idToFind, boolean isStaff) {
 
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-                
                 if (data[1].equals(idToFind)) {
-                    // Send data to the display method (Part 4)
                     displayPayrollFromData(data, isStaff); 
                     found = true;
                     break;
@@ -16,7 +14,7 @@ public static void searchAndDisplayEmployee(String idToFind, boolean isStaff) {
             }
 
             if (!found) {
-                // YOUR REQUESTED MESSAGE
+                // Triggered if the Employee # does not exist in the CSV
                 System.out.println("\nEmployee # unidentified. Please check the # and try again. \n Program Terminated.");
                 System.exit(0);
             }
@@ -31,7 +29,7 @@ public static void searchAndDisplayEmployee(String idToFind, boolean isStaff) {
             br.readLine(); 
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-                displayPayrollFromData(data, true); // Staff view
+                displayPayrollFromData(data, true); 
                 System.out.println("-------------------------------------------------------");
             }
             System.out.println("\nAll records processed. \n Program Terminated.");

@@ -20,13 +20,17 @@ The MotorPH Payroll System is a Java console application designed to handle bimo
 🔐 Role-Based Authentication
 
 Employee Account: (Username: employee) Allows staff to view their basic profile details (ID, Name, and Birthday) while keeping payroll data private.
+
 Staff Account: (Username: payroll_staff) Grants full access to process payroll for individuals or the entire company.
+
 Security: Centralized password verification (12345) for all accounts.
 
 👤 Data Management (Hardcoded Data Layer)
 
 Unlike systems that rely on external files, this version uses internal Static Arrays for maximum portability and speed. It stores:
+
 Employee Metadata: IDs, Full Names, and Birthdays.
+
 Financial Data: Hourly rates and pre-logged hours worked for two specific cut-off periods.
 
 💰 Payroll Engine
@@ -39,8 +43,11 @@ The system automates complex calculations per month:
 💻 Technical Implementation
 
 Language: Java
+
 Input Handling: java.util.Scanner for interactive terminal menus.
+
 Formatting: System.out.printf for professional-grade currency and decimal alignment.
+
 Error Handling: Custom logic to catch invalid menu selections and non-existent employee IDs.
 
 🏃 How to Run
@@ -55,8 +62,9 @@ java MO-IT101-Group14
 🛡️ Error Handling Mechanisms
 The system is programmed to terminate securely and notify the user if:
 
-Incorrect login credentials are provided.
-An invalid menu number is selected.
-An employee ID is entered that does not exist in the system's database.
+- Incorrect login credentials are provided.
+- An invalid menu number is selected.
+- An employee ID is entered that does not exist in the system's database.
+- Payroll could not be processed.
 
 Note: This project is for academic purposes for Computer Programming 1.

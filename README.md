@@ -3,9 +3,9 @@ Computer Programming 1 | Group 14 (H1101)
 
 👥 Development Team
 
-Delos Santos, Q.L.,
-Palayaban, M.,
-Saga, G.M.,
+1. Delos Santos, Q.L.,
+2. Palayaban, M.,
+3. Saga, G.M.,
 Agbayani, E.Z.,
 Elviña, J.N.
 

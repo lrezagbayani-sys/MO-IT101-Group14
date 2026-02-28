@@ -1,45 +1,48 @@
-// Method to search for a specific ID in the CSV
-    public static void searchAndDisplayEmployee(String idToFind, boolean isStaff) {
-        // Use try-with-resources to ensure the file closes automatically
-        try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
-            String line;
-            boolean found = false;
+public static void displayPayrollFromData(String[] data, boolean isStaff) {
+        System.out.println("\n-- EMPLOYEE DETAILS --");
+        System.out.println("Employee #:    " + data[1]);
+        System.out.println("Full Name:     " + data[2]);
+        System.out.println("Birthday:      " + data[3]);
+
+        if (isStaff) {
+            System.out.println("\n-- PAYROLL INFORMATION --");
             
-            br.readLine(); // Read and skip the first line (the header)
+            // First Cutoff Logic
+            double hoursWeek1 = Double.parseDouble(data[10]);
+            double hoursWeek2 = Double.parseDouble(data[11]);
+            System.out.println("Cutoff Date:       June 1 to June 15");
+            System.out.println("Total Hours Worked: " + (hoursWeek1 + hoursWeek2));
+            System.out.println("Gross Salary:      " + data[16]);
+            System.out.println("Net Salary:        " + data[16]);
 
-            // Loop through the file until the end
-            while ((line = br.readLine()) != null) {
-                // Regex split: Handles commas inside quotes (e.g., "1,000")
-                String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-                
-                // data[1] is the Employee ID column
-                if (data[1].equals(idToFind)) {
-                    displayPayrollFromData(data); // Call the display method with the row data
-                    found = true;
-                    break; // Stop searching once found
-                }
-            }
-            if (!found) {
-                System.out.println("\nEmployee ID " + idToFind + " not found.");
-            }
-            terminateNormally();
-        } catch (Exception e) {
-            System.out.println("Error reading CSV file. Please check if the file exists.");
-        }
-    }
+            // Second Cutoff Logic
+            double hoursWeek3 = Double.parseDouble(data[12]);
+            double hoursWeek4 = Double.parseDouble(data[13]);
+            System.out.println("\nCutoff Date:       June 16 to June 30 (Second payout includes all deductions)");
+            System.out.println("Total Hours Worked: " + (hoursWeek3 + hoursWeek4));
+            System.out.println("Gross Salary:      " + data[16]);
 
-    // Method to process every row in the CSV (Staff option 2)
-    public static void processAllEmployees() {
-        try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
-            String line;
-            br.readLine(); // Skip header
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-                displayPayrollFromData(data); // Display current row
-                System.out.println("------------------------------------------------------------------");
-            }
-            terminateNormally();
-        } catch (Exception e) {
-            System.out.println("Error processing payroll list.");
+            System.out.println("\nEACH DEDUCTION:");
+            System.out.println("SSS:               " + data[6]);
+            System.out.println("PhilHealth:        " + data[7]);
+            System.out.println("Pag-IBIG:          " + data[8]);
+            System.out.println("Withholding Tax:   " + data[9]);
+
+            // Math to calculate Total Deductions
+            double sss = Double.parseDouble(data[6].replace("\"", "").replace(",", ""));
+            double ph = Double.parseDouble(data[7].replace("\"", "").replace(",", ""));
+            double pi = Double.parseDouble(data[8].replace("\"", "").replace(",", ""));
+            double tax = Double.parseDouble(data[9].replace("\"", "").replace(",", ""));
+            double totalDeductions = sss + ph + pi + tax;
+            
+            System.out.println("Total Deductions:  " + String.format("%.2f", totalDeductions));
+            System.out.println("\nNet Salary:        " + data[17]);
+        } else {
+            System.out.println("\n-- PAYROLL INFORMATION --");
+            System.out.println("Note: Payroll and Attendance details are restricted.");
+            System.out.println("Please contact Human Resources for salary inquiries.");
         }
+
+        // Final Termination Message
+        System.out.println("\nThank you for using the MotorPH Payroll System! \nProgram Terminated.");
     }

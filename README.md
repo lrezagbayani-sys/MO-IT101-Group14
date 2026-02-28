@@ -47,10 +47,10 @@ Error Handling: Custom logic to catch invalid menu selections and non-existent e
 Ensure you have JDK 8 or higher installed.
 
 Compile the file:
-javac MotorPH_Payroll.java
+javac MO-IT101-Group14.java
 
 Execute the program:
-java MotorPH_Payroll
+java MO-IT101-Group14
 
 🛡️ Error Handling Mechanisms
 The system is programmed to terminate securely and notify the user if:

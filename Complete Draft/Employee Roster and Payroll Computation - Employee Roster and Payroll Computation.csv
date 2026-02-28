@@ -1,3 +1,4 @@
+
 #,Employee ID,Full Name,Status,Position,Basic Salary,SSS,PhilHealth,Pag-IBIG,Tax,W1 (Jun 3-7),W2 (Jun 10-14),W3 (Jun 17-21),W4 (Jun 24-28),Total Hrs,Hourly Rate,Gross Semi,Net Salary
 1,10001,Manuel Garcia III,Regular,CEO,"90,000","1,125",900,100,"17,195.40",48.65,50.48,45.45,42.47,187.05,535.71,"45,000","70,679.60"
 2,10002,Antonio Lim,Regular,COO,"60,000","1,125",900,100,"8,635.42",48.08,48.55,45.37,45.03,187.03,357.14,"30,000","49,239.58"

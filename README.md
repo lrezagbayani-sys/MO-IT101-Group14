@@ -2,10 +2,10 @@
 Computer Programming 1 | Group 14 (H1101)
 
 👥 Development Team
-Delos Santos, Q.L.
-Palayaban, M.
-Saga, G.M.
-Agbayani, E.Z.
+Delos Santos, Q.L.,
+Palayaban, M.,
+Saga, G.M.,
+Agbayani, E.Z.,
 Elviña, J.N.
 
 Effort Estimation & Project Plan: https://docs.google.com/spreadsheets/d/14QEroycZBSs3QpdtPJ-ELushEXd8EPXep8-dBjpRDtk/edit?usp=sharing

@@ -8,6 +8,8 @@ Saga, G.M.
 Agbayani, E.Z.
 Elviña, J.N.
 
+Effort Estimation & Project Plan: https://docs.google.com/spreadsheets/d/14QEroycZBSs3QpdtPJ-ELushEXd8EPXep8-dBjpRDtk/edit?usp=sharing
+
 🚀 System Overview
 The MotorPH Payroll System is a Java console application designed to handle bimonthly payroll processing. It utilizes a secure, role-based access system to ensure that sensitive salary information is only accessible to authorized payroll staff.
 

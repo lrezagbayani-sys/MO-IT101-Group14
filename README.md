@@ -1,4 +1,4 @@
-🏢 MotorPH Payroll System: Phase 1
+🏢 MotorPH Payroll System: Milestone 2 | 
 Computer Programming 1 | Group 14 (H1101)
 
 👥 Development Team

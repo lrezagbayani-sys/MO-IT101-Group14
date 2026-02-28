@@ -1,0 +1,135 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import java.util.Scanner;
+
+public class MotorPH_Payroll_Final {
+
+    private static final String CSV_FILE = "src/employee_data.csv";
+
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        System.out.println("=== MOTORPH PAYROLL SYSTEM ===");
+        System.out.print("Username: ");
+        String username = input.nextLine();
+        System.out.print("Password: ");
+        String password = input.nextLine();
+
+        if (password.equals("12345")) {
+            if (username.equalsIgnoreCase("payroll_staff")) {
+                System.out.println("\nLogin Successful! Welcome, Payroll Staff.");
+                runStaffPortal(input);
+            } else if (username.equalsIgnoreCase("employee")) {
+                System.out.println("\nLogin Successful! Welcome, MotorPH Employee.");
+                runEmployeePortal(input);
+            } else {
+                System.out.println("\nAccess Denied: Incorrect login details.");
+                System.out.println("Program Terminated.");
+            }
+        } else {
+            System.out.println("\nAccess Denied: Incorrect login details.");
+            System.out.println("Program Terminated.");
+        }
+        input.close();
+    }
+
+    public static void runStaffPortal(Scanner input) {
+        System.out.println("\n[MOTORPH PAYROLL STAFF PORTAL]");
+        System.out.println("Select One (1) Option:");
+        System.out.println("1. Process Payroll for One Employee");
+        System.out.println("2. Process Payroll for All Employees");
+        System.out.println("3. Exit Program");
+        System.out.print("Choice: ");
+        String choice = input.nextLine();
+
+        if (choice.equals("1")) {
+            System.out.print("Enter Employee Number: ");
+            searchAndDisplay(input.nextLine());
+        } else if (choice.equals("2")) {
+            processAll();
+        } else {
+            System.out.println("\nThank you for using the MotorPH Payroll System!");
+            System.out.println("Program Terminated.");
+        }
+    }
+
+    public static void runEmployeePortal(Scanner input) {
+        System.out.println("\n[MOTORPH EMPLOYEE PORTAL]");
+        System.out.println("Select One (1) Option:");
+        System.out.println("1. View My Employee Details");
+        System.out.println("2. Exit Program");
+        System.out.print("Choice: ");
+        String choice = input.nextLine();
+
+        if (choice.equals("1")) {
+            System.out.print("Enter Your Employee Number: ");
+            searchAndDisplay(input.nextLine());
+        } else {
+            System.out.println("\nThank you for using the MotorPH Payroll System!");
+            System.out.println("Program Terminated.");
+        }
+    }
+
+    public static void searchAndDisplay(String id) {
+        try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
+            String line;
+            br.readLine(); // Skip header
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                if (data[1].trim().equals(id.trim())) {
+                    
+                    // Basic Info
+                    System.out.println("\n--- Employee Records ---");
+                    System.out.println("1. Employee #: " + data[1]);
+                    System.out.println("2. Employee Name: " + data[2]);
+                    System.out.println("3. Birthday: " + data[3]);
+
+                    // Calculations
+                    double rate = Double.parseDouble(data[16].replace("\"", "").replace(",", ""));
+                    double totalHours = Double.parseDouble(data[15].replace("\"", "").replace(",", ""));
+                    double halfHours = totalHours / 2;
+                    double grossHalf = rate * halfHours;
+                    
+                    double sss = Double.parseDouble(data[7].replace("\"", "").replace(",", ""));
+                    double phil = Double.parseDouble(data[8].replace("\"", "").replace(",", ""));
+                    double pagibig = Double.parseDouble(data[9].replace("\"", "").replace(",", ""));
+                    double tax = Double.parseDouble(data[10].replace("\"", "").replace(",", ""));
+                    double totalDeductions = sss + phil + pagibig + tax;
+                    double netSecondPayout = grossHalf - totalDeductions;
+
+                    // FIRST CUTOFF DISPLAY
+                    System.out.println("4. Cutoff Date: June 1 to June 15");
+                    System.out.println("5. Total Hours Worked: " + String.format("%.2f", halfHours));
+                    System.out.println("6. Gross Salary: PHP " + String.format("%.2f", grossHalf));
+                    System.out.println("7. Net Salary: PHP " + String.format("%.2f", grossHalf));
+
+                    // SECOND CUTOFF DISPLAY
+                    System.out.println("8. Cutoff Date: June 16 to June 30 (Second payout includes all deductions)");
+                    System.out.println("9. Total Hours Worked: " + String.format("%.2f", halfHours));
+                    System.out.println("10. Gross Salary: PHP " + String.format("%.2f", grossHalf));
+                    System.out.println("11. Each Deduction:");
+                    System.out.println("12.   SSS: PHP " + data[7].replace("\"", ""));
+                    System.out.println("13.   PhilHealth: PHP " + data[8].replace("\"", ""));
+                    System.out.println("14.   Pag-IBIG: PHP " + data[9].replace("\"", ""));
+                    System.out.println("15.   Tax: PHP " + data[10].replace("\"", ""));
+                    System.out.println("16. Total Deductions: PHP " + String.format("%.2f", totalDeductions));
+                    System.out.println("17. Net Salary: PHP " + String.format("%.2f", netSecondPayout));
+
+                    System.out.println("\nComputation Successful. Thank you for using the MotorPH Payroll System!");
+                    System.out.println("Program Terminated.");
+                    return;
+                }
+            }
+            System.out.println("\nAccess Denied: Employee # does not exist. Please try again.");
+            System.out.println("Program Terminated.");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static void processAll() {
+        // Option 2 implementation (Batch processing)
+        System.out.println("\nProcessing all records...");
+        // Logic for all can follow similar format if needed
+    }
+}

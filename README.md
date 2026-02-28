@@ -46,8 +46,8 @@ The system automates complex calculations per month:
 
 🏃 How to Run
 1. Ensure you have JDK 8 or higher installed.
-2. Compile the file: javac MotorPH_PayrollSystem.java
-3. Execute the program: java MotorPH_PayrollSystem
+2. Compile the file: javac MotorPH_PayrollSystem_Grp14.java
+3. Execute the program: java MotorPH_PayrollSystem_Grp14
 
 🛡️ Error Handling Mechanisms
 The system is programmed to terminate securely and notify the user if:

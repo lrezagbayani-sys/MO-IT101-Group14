@@ -12,7 +12,7 @@ public class MotorPH_Payroll_Final {
         Scanner input = new Scanner(System.in);
 
         // Display the system header
-        System.out.println("=== MotorPH Payroll System (Final) ===");
+        System.out.println("=== MotorPH Payroll System ===");
         
         // Ask for the username
         System.out.print("Username: ");
@@ -37,9 +37,9 @@ public class MotorPH_Payroll_Final {
                 System.out.println("\nLogin Successful! Welcome, MotorPH Employee.");
                 runEmployeePortal(input);
             } 
-            // If the password is correct but the username isn't one of the two roles
+            // If the password is correct, but the username isn't one of the two roles
             else {
-                System.out.println("\nAccess Denied: Unknown Username.");
+                System.out.println("\nAccess Denied: Unknown Username. Program terminated.");
                 System.exit(0);
             }
 

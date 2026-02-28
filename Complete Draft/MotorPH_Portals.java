@@ -1,18 +1,26 @@
 // Method for the Employee View
     public static void runEmployeePortal(Scanner input) {
         System.out.println("\n[MOTORPH EMPLOYEE PORTAL]");
-        System.out.println("1. View My Payroll Details");
-        System.out.println("2. Exit the program");
+        System.out.println("1. View My Employee Details");
+        System.out.println("2. Exit Program");
         System.out.print("Select: ");
         String choice = input.nextLine();
 
         if (choice.equals("1")) {
             System.out.print("Enter Your Employee Number: ");
             String idInput = input.nextLine();
-            // Call the search method to find and display this specific ID
+            // We pass 'false' because they are NOT staff
             searchAndDisplayEmployee(idInput, false); 
-        } else {
-            terminateNormally(); // Close program
+        } 
+        else if (choice.equals("2")) {
+            // YOUR REQUESTED MESSAGE
+            System.out.println("\nThank you for using the MotorPH Payroll System! \n Program Terminated.");
+            System.exit(0);
+        } 
+        else {
+            // YOUR REQUESTED MESSAGE
+            System.out.println("\nSelected option unidentified. Please select from the given numbers and try again. \n Program Terminated.");
+            System.exit(0);
         }
     }
 
@@ -21,19 +29,27 @@
         System.out.println("\n[MOTORPH PAYROLL STAFF PORTAL]");
         System.out.println("1. Process Payroll for One Employee");
         System.out.println("2. Process Payroll for All Employees");
-        System.out.println("3. Exit the program");
+        System.out.println("3. Exit Program");
         System.out.print("Select: ");
         String choice = input.nextLine();
 
         if (choice.equals("1")) {
             System.out.print("Enter Employee Number: ");
             String idInput = input.nextLine();
-            // Search and display a single employee from CSV
+            // We pass 'true' because they ARE staff
             searchAndDisplayEmployee(idInput, true);
-        } else if (choice.equals("2")) {
-            // Process the entire CSV file
+        } 
+        else if (choice.equals("2")) {
             processAllEmployees();
-        } else {
-            terminateNormally();
+        } 
+        else if (choice.equals("3")) {
+            // YOUR REQUESTED MESSAGE
+            System.out.println("\nThank you for using the MotorPH Payroll System! \n Program Terminated.");
+            System.exit(0);
+        } 
+        else {
+            // YOUR REQUESTED MESSAGE
+            System.out.println("\nSelected option unidentified. Please select from the given numbers and try again. \n Program Terminated.");
+            System.exit(0);
         }
     }

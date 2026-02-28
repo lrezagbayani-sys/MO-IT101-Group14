@@ -4,8 +4,8 @@ import java.util.Scanner;      // Import for getting keyboard input from user
 
 public class MotorPH_Payroll_Final {
 
-    // Define the file name as a constant for easy access
-    private static final String CSV_FILE = "Employee Roster and Payroll Computation - Employee Roster and Payroll Computation.csv";
+ // Change this line in your main code:
+private static final String CSV_FILE = "src/Employee Roster and Payroll Computation - Employee Roster and Payroll Computation.csv";
 
     public static void main(String[] args) {
         // Create a scanner object to read input from the console

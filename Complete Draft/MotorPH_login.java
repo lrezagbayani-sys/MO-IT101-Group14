@@ -23,20 +23,28 @@ public class MotorPH_Payroll_Final {
         String password = input.nextLine();
 
         // Check if the credentials match the requirements (12345 for password)
-        if (password.equals("12345") && 
-           (username.equals("payroll_staff") || username.equals("employee"))) {
+        if (password.equals("12345")) {
 
-            // Redirect to Employee Portal if the user is an employee
-            if (username.equals("employee")) {
+            // Logic for Payroll Staff Login
+            if (username.equals("payroll_staff")) {
+                // ADDED: Fun personalized welcome message for Staff
+                System.out.println("\nLogin Successful! Welcome, Payroll Staff.");
+                runStaffPortal(input);
+            } 
+            // Logic for Employee Login
+            else if (username.equals("employee")) {
+                // ADDED: Fun personalized welcome message for Employees
+                System.out.println("\nLogin Successful! Welcome, MotorPH Employee.");
                 runEmployeePortal(input);
             } 
-            // Redirect to Staff Portal if the user is a payroll staff
+            // If the password is correct but the username isn't one of the two roles
             else {
-                runStaffPortal(input);
+                System.out.println("\nAccess Denied: Unknown Username.");
+                System.exit(0);
             }
 
         } else {
-            // Error message if login fails
+            // Error message if password fails
             System.out.println("\nIncorrect username and/or password. Program terminated.");
             System.exit(0); // Exit the program immediately
         }
@@ -44,3 +52,7 @@ public class MotorPH_Payroll_Final {
         // Close the scanner to prevent memory leaks
         input.close();
     }
+    
+    // Note: The portal methods (runEmployeePortal/runStaffPortal) remain 
+    // exactly the same as the previous version I sent you.
+}

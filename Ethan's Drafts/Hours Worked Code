@@ -1,1 +1,318 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.*;
 
+public class MotorPHFinal {
+
+    private static final String CSV_FILE = "src/employee_data.csv";
+    private static final String ATTENDANCE_CSV = "Employee Attendance Record.csv";
+
+    static class HoursWorked {
+        private int attendDay;
+        private int attendMonth;
+        private int attendYear;
+        private double logInTime;
+        private double logOutTime;
+        private double hoursWorked;
+
+        public void setAttendanceDate(int day, int month, int year) {
+            if (day < 1 || day > 31)   throw new IllegalArgumentException("Invalid day: " + day);
+            if (month < 1 || month > 12) throw new IllegalArgumentException("Invalid month: " + month);
+            if (year < 0)              throw new IllegalArgumentException("Invalid year: " + year);
+            this.attendDay   = day;
+            this.attendMonth = month;
+            this.attendYear  = year;
+        }
+
+        public void setLogTimes(double logIn, double logOut) {
+            if (logIn  < 0 || logIn  > 24) throw new IllegalArgumentException("Invalid log-in time: " + logIn);
+            if (logOut < 0 || logOut > 24) throw new IllegalArgumentException("Invalid log-out time: " + logOut);
+            if (logOut <= logIn)           throw new IllegalArgumentException("Log-out must be after log-in.");
+            this.logInTime  = logIn;
+            this.logOutTime = logOut;
+        }
+
+        public double calculateHours() {
+            hoursWorked = logOutTime - logInTime - 1.0; // deduct 1-hour break
+            if (hoursWorked < 0) throw new IllegalStateException("Calculated hours worked is negative.");
+            return hoursWorked;
+        }
+
+        public double getHoursWorked() { return hoursWorked; }
+
+        /** Returns a one-line summary string for display. */
+        public String getSummary() {
+            return String.format("  %02d/%02d/%04d | In: %.2f | Out: %.2f | Hours: %.2f",
+                    attendMonth, attendDay, attendYear, logInTime, logOutTime, hoursWorked);
+        }
+    }
+
+    static class AttendanceRecord {
+        String employeeId;
+        String lastName;
+        String firstName;
+        HoursWorked hw = new HoursWorked();
+
+        double getHours() { return hw.getHoursWorked(); }
+        String getSummary() { return hw.getSummary(); }
+    }
+
+    private static double parseTime(String raw) {
+        raw = raw.trim();
+        if (raw.contains(":")) {
+            String[] parts = raw.split(":");
+            int h = Integer.parseInt(parts[0].trim());
+            int m = Integer.parseInt(parts[1].trim());
+            return h + m / 60.0;
+        }
+        return Double.parseDouble(raw);
+    }
+
+    private static int[] parseDate(String raw) {
+        raw = raw.trim().replaceAll("\\s*/\\s*", "/");
+        String[] p = raw.split("/");
+        int month = Integer.parseInt(p[0].trim());
+        int day   = Integer.parseInt(p[1].trim());
+        int year  = Integer.parseInt(p[2].trim());
+        return new int[]{day, month, year};
+    }
+
+    public static Map<String, List<AttendanceRecord>> loadAttendance(int maxRows) {
+        Map<String, List<AttendanceRecord>> map = new LinkedHashMap<>();
+        int rowsRead = 0;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(ATTENDANCE_CSV))) {
+            br.readLine(); // skip header
+            String line;
+            while ((line = br.readLine()) != null && rowsRead < maxRows) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                String[] cols = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)|\t");
+
+                if (cols.length < 6) continue; // malformed row
+
+                try {
+                    AttendanceRecord rec = new AttendanceRecord();
+                    rec.employeeId = cols[0].trim().replace("\"", "");
+                    rec.lastName   = cols[1].trim().replace("\"", "");
+                    rec.firstName  = cols[2].trim().replace("\"", "");
+
+                    int[] date = parseDate(cols[3].replace("\"", ""));
+                    rec.hw.setAttendanceDate(date[0], date[1], date[2]);
+
+                    double logIn  = parseTime(cols[4].replace("\"", ""));
+                    double logOut = parseTime(cols[5].replace("\"", ""));
+                    rec.hw.setLogTimes(logIn, logOut);
+                    rec.hw.calculateHours();
+
+                    map.computeIfAbsent(rec.employeeId, k -> new ArrayList<>()).add(rec);
+                    rowsRead++;
+                } catch (Exception ex) {
+                    System.out.println("  [Skipped row " + (rowsRead + 1) + "]: " + ex.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error reading attendance file: " + e.getMessage());
+        }
+
+        return map;
+    }
+
+    public static void displayAttendanceSummary(String employeeId,
+                                                 Map<String, List<AttendanceRecord>> attendance) {
+        List<AttendanceRecord> records = attendance.get(employeeId);
+        if (records == null || records.isEmpty()) {
+            System.out.println("No attendance records found for Employee #" + employeeId);
+            return;
+        }
+
+        double totalHours = 0;
+        System.out.println("\n=== Attendance Records for Employee #" + employeeId + " ===");
+        System.out.printf("  %-20s | %-8s | %-8s | %-8s%n", "Date", "Log In", "Log Out", "Hours");
+        System.out.println("  " + "-".repeat(55));
+        for (AttendanceRecord r : records) {
+            System.out.println(r.getSummary());
+            totalHours += r.getHours();
+        }
+        System.out.println("  " + "-".repeat(55));
+        System.out.printf("  Total Hours Worked: %.2f hrs over %d day(s)%n",
+                totalHours, records.size());
+    }
+
+    public static void displayAllAttendance(Map<String, List<AttendanceRecord>> attendance) {
+        if (attendance.isEmpty()) {
+            System.out.println("No attendance records loaded.");
+            return;
+        }
+        for (String empId : attendance.keySet()) {
+            displayAttendanceSummary(empId, attendance);
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        System.out.println("=== MOTORPH PAYROLL SYSTEM ===");
+        System.out.print("Username: ");
+        String username = input.nextLine();
+        System.out.print("Password: ");
+        String password = input.nextLine();
+
+        if (password.equals("12345")) {
+            if (username.equalsIgnoreCase("payroll_staff")) {
+                System.out.println("\nLogin Successful! Welcome, Payroll Staff.");
+                runStaffPortal(input);
+            } else if (username.equalsIgnoreCase("employee")) {
+                System.out.println("\nLogin Successful! Welcome, MotorPH Employee.");
+                runEmployeePortal(input);
+            } else {
+                System.out.println("\nAccess Denied: Incorrect login details.");
+                System.out.println("Program Terminated.");
+            }
+        } else {
+            System.out.println("\nAccess Denied: Incorrect login details.");
+            System.out.println("Program Terminated.");
+        }
+        input.close();
+    }
+
+    public static void runStaffPortal(Scanner input) {
+        System.out.println("\n[MOTORPH PAYROLL STAFF PORTAL]");
+        System.out.println("Select One (1) Option:");
+        System.out.println("1. Process Payroll for One Employee");
+        System.out.println("2. Process Payroll for All Employees");
+        System.out.println("3. View Attendance Hours for One Employee");
+        System.out.println("4. View Attendance Hours for All Employees");
+        System.out.println("5. Exit Program");
+        System.out.print("Choice: ");
+        String choice = input.nextLine();
+
+        Map<String, List<AttendanceRecord>> attendance = loadAttendance(5000);
+
+        switch (choice) {
+            case "1":
+                System.out.print("Enter Employee Number: ");
+                displayStaffView(input.nextLine());
+                break;
+            case "2":
+                processAll();
+                break;
+            case "3":
+                System.out.print("Enter Employee Number: ");
+                displayAttendanceSummary(input.nextLine().trim(), attendance);
+                System.out.println("\nThank you for using the MotorPH Payroll System!");
+                System.out.println("Program Terminated.");
+                break;
+            case "4":
+                displayAllAttendance(attendance);
+                System.out.println("\nThank you for using the MotorPH Payroll System!");
+                System.out.println("Program Terminated.");
+                break;
+            default:
+                System.out.println("\nThank you for using the MotorPH Payroll System!");
+                System.out.println("Program Terminated.");
+        }
+    }
+
+    public static void runEmployeePortal(Scanner input) {
+        System.out.println("\n[MOTORPH EMPLOYEE PORTAL]");
+        System.out.println("Select One (1) Option:");
+        System.out.println("1. View My Employee Details");
+        System.out.println("2. View My Attendance Hours");
+        System.out.println("3. Exit Program");
+        System.out.print("Choice: ");
+        String choice = input.nextLine();
+
+        if (choice.equals("1")) {
+            System.out.print("Enter Your Employee Number: ");
+            displayEmployeeView(input.nextLine());
+        } else if (choice.equals("2")) {
+            System.out.print("Enter Your Employee Number: ");
+            String empId = input.nextLine().trim();
+            Map<String, List<AttendanceRecord>> attendance = loadAttendance(5000);
+            displayAttendanceSummary(empId, attendance);
+            System.out.println("\nThank you for using the MotorPH Payroll System!");
+            System.out.println("Program Terminated.");
+        } else {
+            System.out.println("\nThank you for using the MotorPH Payroll System!");
+            System.out.println("Program Terminated.");
+        }
+    }
+
+    public static void displayEmployeeView(String id) {
+        try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
+            String line;
+            br.readLine();
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                if (data[1].trim().equals(id.trim())) {
+                    System.out.println("\n--- Employee Records ---");
+                    System.out.println("Employee #: " + data[1]);
+                    System.out.println("2. Employee Name: " + data[2]);
+                    System.out.println("3. Birthday: " + data[3]);
+                    System.out.println("\nThank you for using the MotorPH Payroll System!");
+                    System.out.println("Program Terminated.");
+                    return;
+                }
+            }
+            System.out.println("\nAccess Denied: Employee # does not exist.");
+            System.out.println("Program Terminated.");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static void displayStaffView(String id) {
+        try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
+            String line;
+            br.readLine();
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                if (data[1].trim().equals(id.trim())) {
+                    System.out.println("\n--- Employee Records ---");
+                    System.out.println("1. Employee #: " + data[1]);
+                    System.out.println("2. Employee Name: " + data[2]);
+                    System.out.println("3. Birthday: " + data[3]);
+
+                    double rate       = Double.parseDouble(data[16].replace("\"", "").replace(",", ""));
+                    double totalHours = Double.parseDouble(data[15].replace("\"", "").replace(",", ""));
+                    double halfHours  = totalHours / 2;
+                    double grossHalf  = rate * halfHours;
+
+                    double sss      = Double.parseDouble(data[7].replace("\"", "").replace(",", ""));
+                    double phil     = Double.parseDouble(data[8].replace("\"", "").replace(",", ""));
+                    double pagibig  = Double.parseDouble(data[9].replace("\"", "").replace(",", ""));
+                    double tax      = Double.parseDouble(data[10].replace("\"", "").replace(",", ""));
+                    double totalDed = sss + phil + pagibig + tax;
+
+                    System.out.println("4. Cutoff Date: June 1 to June 15");
+                    System.out.println("5. Total Hours Worked: " + String.format("%.2f", halfHours));
+                    System.out.println("6. Gross Salary: PHP " + String.format("%.2f", grossHalf));
+                    System.out.println("7. Net Salary: PHP " + String.format("%.2f", grossHalf));
+                    System.out.println("8. Cutoff Date: June 16 to June 30");
+                    System.out.println("9. Total Hours Worked: " + String.format("%.2f", halfHours));
+                    System.out.println("10. Gross Salary: PHP " + String.format("%.2f", grossHalf));
+                    System.out.println("11. Each Deduction:");
+                    System.out.println("12.   SSS: PHP "       + data[7].replace("\"", ""));
+                    System.out.println("13.   PhilHealth: PHP " + data[8].replace("\"", ""));
+                    System.out.println("14.   Pag-IBIG: PHP "  + data[9].replace("\"", ""));
+                    System.out.println("15.   Tax: PHP "        + data[10].replace("\"", ""));
+                    System.out.println("16. Total Deductions: PHP " + String.format("%.2f", totalDed));
+                    System.out.println("17. Net Salary: PHP " + String.format("%.2f", (grossHalf - totalDed)));
+
+                    System.out.println("\nComputation Successful. Thank you for using the MotorPH Payroll System!");
+                    System.out.println("Program Terminated.");
+                    return;
+                }
+            }
+            System.out.println("\nAccess Denied: Employee # does not exist.");
+            System.out.println("Program Terminated.");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static void processAll() {
+        System.out.println("\nProcessing all records...");
+    }
+}

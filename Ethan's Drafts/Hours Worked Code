@@ -1,3 +1,5 @@
+package com.mycompany.motorphfinal;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.*;
@@ -8,17 +10,17 @@ public class MotorPHFinal {
     private static final String ATTENDANCE_CSV = "Employee Attendance Record.csv";
 
     static class HoursWorked {
-        private int attendDay;
-        private int attendMonth;
-        private int attendYear;
+        int attendDay;
+        int attendMonth;
+        int attendYear;
         private double logInTime;
         private double logOutTime;
         private double hoursWorked;
 
         public void setAttendanceDate(int day, int month, int year) {
-            if (day < 1 || day > 31)   throw new IllegalArgumentException("Invalid day: " + day);
+            if (day < 1 || day > 31)     throw new IllegalArgumentException("Invalid day: " + day);
             if (month < 1 || month > 12) throw new IllegalArgumentException("Invalid month: " + month);
-            if (year < 0)              throw new IllegalArgumentException("Invalid year: " + year);
+            if (year < 0)                throw new IllegalArgumentException("Invalid year: " + year);
             this.attendDay   = day;
             this.attendMonth = month;
             this.attendYear  = year;
@@ -28,19 +30,18 @@ public class MotorPHFinal {
             if (logIn  < 0 || logIn  > 24) throw new IllegalArgumentException("Invalid log-in time: " + logIn);
             if (logOut < 0 || logOut > 24) throw new IllegalArgumentException("Invalid log-out time: " + logOut);
             if (logOut <= logIn)           throw new IllegalArgumentException("Log-out must be after log-in.");
-            this.logInTime  = logIn;
-            this.logOutTime = logOut;
+            this.logInTime  = Math.max(logIn,  8.0);
+            this.logOutTime = Math.min(logOut, 17.0);
         }
 
         public double calculateHours() {
-            hoursWorked = logOutTime - logInTime - 1.0; // deduct 1-hour break
+            hoursWorked = logOutTime - logInTime - 1.0;
             if (hoursWorked < 0) throw new IllegalStateException("Calculated hours worked is negative.");
             return hoursWorked;
         }
 
         public double getHoursWorked() { return hoursWorked; }
 
-        /** Returns a one-line summary string for display. */
         public String getSummary() {
             return String.format("  %02d/%02d/%04d | In: %.2f | Out: %.2f | Hours: %.2f",
                     attendMonth, attendDay, attendYear, logInTime, logOutTime, hoursWorked);
@@ -53,7 +54,7 @@ public class MotorPHFinal {
         String firstName;
         HoursWorked hw = new HoursWorked();
 
-        double getHours() { return hw.getHoursWorked(); }
+        double getHours()   { return hw.getHoursWorked(); }
         String getSummary() { return hw.getSummary(); }
     }
 
@@ -82,15 +83,14 @@ public class MotorPHFinal {
         int rowsRead = 0;
 
         try (BufferedReader br = new BufferedReader(new FileReader(ATTENDANCE_CSV))) {
-            br.readLine(); // skip header
+            br.readLine();
             String line;
             while ((line = br.readLine()) != null && rowsRead < maxRows) {
                 line = line.trim();
                 if (line.isEmpty()) continue;
 
                 String[] cols = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)|\t");
-
-                if (cols.length < 6) continue; // malformed row
+                if (cols.length < 6) continue;
 
                 try {
                     AttendanceRecord rec = new AttendanceRecord();
@@ -119,25 +119,90 @@ public class MotorPHFinal {
         return map;
     }
 
+    public static void promptAndDisplayAttendance(String employeeId,
+                                                   Map<String, List<AttendanceRecord>> attendance,
+                                                   Scanner input) {
+        System.out.print("Select Month (1-12) or type 'All' for all months: ");
+        String monthInput = input.nextLine().trim();
+
+        System.out.print("Enter Year (4-digit) or type 'All' for all years: ");
+        String yearInput = input.nextLine().trim();
+
+        Integer filterMonth = null;
+        Integer filterYear  = null;
+
+        if (!monthInput.equalsIgnoreCase("All")) {
+            try {
+                filterMonth = Integer.parseInt(monthInput);
+                if (filterMonth < 1 || filterMonth > 12) {
+                    System.out.println("Invalid month. Showing all months.");
+                    filterMonth = null;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Showing all months.");
+            }
+        }
+
+        if (!yearInput.equalsIgnoreCase("All")) {
+            try {
+                filterYear = Integer.parseInt(yearInput);
+                if (String.valueOf(filterYear).length() != 4) {
+                    System.out.println("Invalid year. Showing all years.");
+                    filterYear = null;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Showing all years.");
+            }
+        }
+
+        displayAttendanceSummary(employeeId, attendance, filterMonth, filterYear);
+    }
+
     public static void displayAttendanceSummary(String employeeId,
-                                                 Map<String, List<AttendanceRecord>> attendance) {
+                                                 Map<String, List<AttendanceRecord>> attendance,
+                                                 Integer filterMonth,
+                                                 Integer filterYear) {
         List<AttendanceRecord> records = attendance.get(employeeId);
         if (records == null || records.isEmpty()) {
             System.out.println("No attendance records found for Employee #" + employeeId);
             return;
         }
 
-        double totalHours = 0;
-        System.out.println("\n=== Attendance Records for Employee #" + employeeId + " ===");
+        List<AttendanceRecord> filtered = new ArrayList<>();
+        for (AttendanceRecord r : records) {
+            boolean monthMatch = (filterMonth == null || r.hw.attendMonth == filterMonth);
+            boolean yearMatch  = (filterYear  == null || r.hw.attendYear  == filterYear);
+            if (monthMatch && yearMatch) filtered.add(r);
+        }
+
+        String monthLabel = (filterMonth == null) ? "All Months" : String.format("Month %02d", filterMonth);
+        String yearLabel  = (filterYear  == null) ? "All Years"  : String.valueOf(filterYear);
+
+        System.out.println("\n=== Attendance Records for Employee #" + employeeId
+                + " [" + monthLabel + " | " + yearLabel + "] ===");
+
+        if (filtered.isEmpty()) {
+            System.out.println("  No records found for the selected period.");
+            return;
+        }
+
         System.out.printf("  %-20s | %-8s | %-8s | %-8s%n", "Date", "Log In", "Log Out", "Hours");
         System.out.println("  " + "-".repeat(55));
-        for (AttendanceRecord r : records) {
+
+        double totalHours = 0;
+        for (AttendanceRecord r : filtered) {
             System.out.println(r.getSummary());
             totalHours += r.getHours();
         }
+
         System.out.println("  " + "-".repeat(55));
         System.out.printf("  Total Hours Worked: %.2f hrs over %d day(s)%n",
-                totalHours, records.size());
+                totalHours, filtered.size());
+    }
+
+    public static void displayAttendanceSummary(String employeeId,
+                                                 Map<String, List<AttendanceRecord>> attendance) {
+        displayAttendanceSummary(employeeId, attendance, null, null);
     }
 
     public static void displayAllAttendance(Map<String, List<AttendanceRecord>> attendance) {
@@ -199,7 +264,8 @@ public class MotorPHFinal {
                 break;
             case "3":
                 System.out.print("Enter Employee Number: ");
-                displayAttendanceSummary(input.nextLine().trim(), attendance);
+                String empId3 = input.nextLine().trim();
+                promptAndDisplayAttendance(empId3, attendance, input);
                 System.out.println("\nThank you for using the MotorPH Payroll System!");
                 System.out.println("Program Terminated.");
                 break;
@@ -230,7 +296,7 @@ public class MotorPHFinal {
             System.out.print("Enter Your Employee Number: ");
             String empId = input.nextLine().trim();
             Map<String, List<AttendanceRecord>> attendance = loadAttendance(5000);
-            displayAttendanceSummary(empId, attendance);
+            promptAndDisplayAttendance(empId, attendance, input);
             System.out.println("\nThank you for using the MotorPH Payroll System!");
             System.out.println("Program Terminated.");
         } else {
@@ -293,9 +359,9 @@ public class MotorPHFinal {
                     System.out.println("9. Total Hours Worked: " + String.format("%.2f", halfHours));
                     System.out.println("10. Gross Salary: PHP " + String.format("%.2f", grossHalf));
                     System.out.println("11. Each Deduction:");
-                    System.out.println("12.   SSS: PHP "       + data[7].replace("\"", ""));
+                    System.out.println("12.   SSS: PHP "        + data[7].replace("\"", ""));
                     System.out.println("13.   PhilHealth: PHP " + data[8].replace("\"", ""));
-                    System.out.println("14.   Pag-IBIG: PHP "  + data[9].replace("\"", ""));
+                    System.out.println("14.   Pag-IBIG: PHP "   + data[9].replace("\"", ""));
                     System.out.println("15.   Tax: PHP "        + data[10].replace("\"", ""));
                     System.out.println("16. Total Deductions: PHP " + String.format("%.2f", totalDed));
                     System.out.println("17. Net Salary: PHP " + String.format("%.2f", (grossHalf - totalDed)));

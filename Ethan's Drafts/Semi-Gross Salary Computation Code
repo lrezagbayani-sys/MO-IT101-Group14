@@ -1,1 +1,303 @@
+package com.mycompany.motorphsalary;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.*;
+import java.util.Scanner;
+
+public class MotorPHSalary {
+
+    private static final String ATTENDANCE_CSV = "Employee Attendance Record.csv";
+    private static final String DATABASE_CSV   = "Employee Database.csv";
+
+    static class HourlyRate {
+        String employeeId;
+        String firstName;
+        String lastName;
+        double ratePerHour;
+        //double grossSalary
+        //double deduction (Add ko ng other variables for this)
+
+        public HourlyRate(String employeeId, String lastName, String firstName, double ratePerHour) {
+            if (ratePerHour < 0) throw new IllegalArgumentException("Rate cannot be negative");
+            this.employeeId  = employeeId;
+            this.lastName    = lastName;
+            this.firstName   = firstName;
+            this.ratePerHour = ratePerHour;
+        }
+
+        public double getRatePerHour() { return ratePerHour; }
+    }
+
+    static class SemiMonthlyPay {
+        String employeeId;
+        String firstName;
+        String lastName;
+        int month;
+        int year;
+        int cutoff;
+
+        double hoursWorked;
+        double hourlyRate;
+        double grossPay;
+
+        public static void printHeader() {
+            System.out.printf("%-12s %-15s %-15s %-12s %-14s %-15s%n",
+                    "Employee #", "First Name", "Last Name", "Hourly Rate", "Hours Worked", "Cut-Off Salary");
+            System.out.println("--------------------------------------------------------------------------------");
+        }
+
+        public void printRow() {
+            System.out.printf("%-12s %-15s %-15s %-12.2f %-14.2f PHP %.2f%n",
+                    employeeId, firstName, lastName, hourlyRate, hoursWorked, grossPay);
+        }
+    }
+
+    public static Map<String, HourlyRate> loadHourlyRates() {
+        Map<String, HourlyRate> map = new LinkedHashMap<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(DATABASE_CSV))) {
+            br.readLine();
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                String[] cols = line.split("\t|,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                if (cols.length < 8) continue;
+
+                try {
+                    String empId     = cols[0].replace("\"", "").trim();
+                    String firstName = cols[1].replace("\"", "").trim();
+                    String lastName  = cols[2].replace("\"", "").trim();
+                    double rate      = Double.parseDouble(
+                                           cols[7].replace("\"", "").replace(",", "").trim());
+                    map.put(empId, new HourlyRate(empId, lastName, firstName, rate));
+                } catch (Exception ignored) {}
+            }
+        } catch (Exception e) {
+            System.out.println("  [!] Error loading database file: " + e.getMessage());
+        }
+
+        return map;
+    }
+
+    private static Map<String, List<double[]>> loadAttendanceHours(int maxRows) {
+        Map<String, List<double[]>> map = new LinkedHashMap<>();
+        int rowsRead = 0;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(ATTENDANCE_CSV))) {
+            br.readLine();
+            String line;
+            while ((line = br.readLine()) != null && rowsRead < maxRows) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                String[] cols = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)|\t");
+                if (cols.length < 6) continue;
+
+                try {
+                    String empId = cols[0].replace("\"", "").trim();
+
+                    String rawDate = cols[3].replace("\"", "").trim().replaceAll("\\s*/\\s*", "/");
+                    String[] dateParts = rawDate.split("/");
+                    int month = Integer.parseInt(dateParts[0]);
+                    int day   = Integer.parseInt(dateParts[1]);
+                    int year  = Integer.parseInt(dateParts[2]);
+
+                    double logIn  = parseTime(cols[4].replace("\"", ""));
+                    double logOut = parseTime(cols[5].replace("\"", ""));
+
+                    logIn  = Math.max(logIn, 8.0);
+                    logOut = Math.min(logOut, 17.0);
+
+                    double hours = logOut - logIn - 1.0;
+                    if (hours < 0) hours = 0;
+
+                    map.computeIfAbsent(empId, k -> new ArrayList<>())
+                       .add(new double[]{day, month, year, hours});
+
+                    rowsRead++;
+                } catch (Exception ignored) {}
+            }
+        } catch (Exception e) {
+            System.out.println("  [!] Error loading attendance file: " + e.getMessage());
+        }
+
+        return map;
+    }
+
+    private static double parseTime(String raw) {
+        raw = raw.trim();
+        if (raw.contains(":")) {
+            String[] parts = raw.split(":");
+            int h = Integer.parseInt(parts[0].trim());
+            int m = Integer.parseInt(parts[1].trim());
+            return h + m / 60.0;
+        }
+        return Double.parseDouble(raw);
+    }
+
+    public static SemiMonthlyPay computePay(String employeeId,
+                                            int targetMonth,
+                                            int targetYear,
+                                            int cutoff,
+                                            Map<String, List<double[]>> attendanceHours,
+                                            Map<String, HourlyRate> hourlyRates) {
+
+        HourlyRate rate = hourlyRates.get(employeeId);
+        if (rate == null) {
+            System.out.println("  [!] No hourly rate found for Employee #" + employeeId + ".");
+            return null;
+        }
+
+        List<double[]> records = attendanceHours.get(employeeId);
+        if (records == null || records.isEmpty()) {
+            System.out.println("  [!] No attendance records found for Employee #" + employeeId + ".");
+            return null;
+        }
+
+        double totalHours = 0;
+
+        for (double[] rec : records) {
+            int day   = (int) rec[0];
+            int month = (int) rec[1];
+            int year  = (int) rec[2];
+            double hours = rec[3];
+
+            if (month != targetMonth || year != targetYear) continue;
+
+            if (cutoff == 1 && day >= 1  && day <= 16) totalHours += hours;
+            if (cutoff == 2 && day >= 17 && day <= 31) totalHours += hours;
+        }
+
+        SemiMonthlyPay pay = new SemiMonthlyPay();
+        pay.employeeId  = employeeId;
+        pay.firstName   = rate.firstName;
+        pay.lastName    = rate.lastName;
+        pay.month       = targetMonth;
+        pay.year        = targetYear;
+        pay.cutoff      = cutoff;
+        pay.hourlyRate  = rate.getRatePerHour();
+        pay.hoursWorked = totalHours;
+        pay.grossPay    = totalHours * rate.getRatePerHour();
+
+        return pay;
+    }
+
+    private static int promptInt(Scanner input, String prompt, int min, int max) {
+        while (true) {
+            System.out.print(prompt);
+            String raw = input.nextLine().trim();
+
+            if (raw.isEmpty()) {
+                System.out.println("  [!] Input cannot be empty. Please try again.");
+                continue;
+            }
+
+            if (!raw.matches("-?\\d+")) {
+                System.out.println("  [!] Invalid input. Please enter numbers only.");
+                continue;
+            }
+
+            if (raw.replaceAll("-", "").length() > 6) {
+                System.out.println("  [!] Input is too large. Please enter a valid number.");
+                continue;
+            }
+
+            int value;
+            try {
+                value = Integer.parseInt(raw);
+            } catch (NumberFormatException e) {
+                System.out.println("  [!] Input is out of range. Please try again.");
+                continue;
+            }
+
+            if (value < min || value > max) {
+                System.out.println("  [!] Value must be between " + min + " and " + max + ".");
+                continue;
+            }
+
+            return value;
+        }
+    }
+
+    private static int[] getMonthYearCutoff(Scanner input) {
+        int month  = promptInt(input, "Enter Month (1-12): ",                          1,    12);
+        int year   = promptInt(input, "Enter Year (4-digit): ",                     1900,  9999);
+        int cutoff = promptInt(input, "Enter Cutoff (1 = Days 1-16 | 2 = Days 17-30): ", 1,  2);
+        return new int[]{month, year, cutoff};
+    }
+
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+
+        System.out.println("=== MOTORPH SALARY SYSTEM ===");
+        System.out.print("Username: ");
+        String username = input.nextLine();
+        System.out.print("Password: ");
+        String password = input.nextLine();
+
+        if (!password.equals("12345")) {
+            System.out.println("  [!] Access Denied.");
+            return;
+        }
+
+        if (username.equalsIgnoreCase("payroll_staff")) {
+            runStaffPortal(input);
+        } else if (username.equalsIgnoreCase("employee")) {
+            runEmployeePortal(input);
+        } else {
+            System.out.println("  [!] Access Denied.");
+        }
+
+        input.close();
+    }
+
+    public static void runStaffPortal(Scanner input) {
+        Map<String, HourlyRate>     rates      = loadHourlyRates();
+        Map<String, List<double[]>> attendance = loadAttendanceHours(5000);
+
+        System.out.println("\n[MOTORPH STAFF - SALARY VIEWER]");
+        System.out.println("1. View Salary Computation");
+        System.out.println("2. Exit");
+        System.out.print("Choice: ");
+
+        String choice = input.nextLine();
+
+        switch (choice) {
+            case "1":
+                System.out.print("Enter Employee Number or type 'All': ");
+                String empId = input.nextLine().trim();
+                int[] myc = getMonthYearCutoff(input);
+
+                SemiMonthlyPay.printHeader();
+                if (empId.equalsIgnoreCase("All")) {
+                    for (String id : attendance.keySet()) {
+                        SemiMonthlyPay pay = computePay(id, myc[0], myc[1], myc[2], attendance, rates);
+                        if (pay != null) pay.printRow();
+                    }
+                } else {
+                    SemiMonthlyPay pay = computePay(empId, myc[0], myc[1], myc[2], attendance, rates);
+                    if (pay != null) pay.printRow();
+                }
+                break;
+            default:
+                System.out.println("Program Terminated.");
+        }
+    }
+
+    public static void runEmployeePortal(Scanner input) {
+        Map<String, HourlyRate>     rates      = loadHourlyRates();
+        Map<String, List<double[]>> attendance = loadAttendanceHours(5000);
+
+        System.out.println("\n[MOTORPH EMPLOYEE - SALARY VIEWER]");
+        System.out.print("Enter Your Employee Number: ");
+        String empId = input.nextLine().trim();
+        int[] myc = getMonthYearCutoff(input);
+
+        SemiMonthlyPay.printHeader();
+        SemiMonthlyPay pay = computePay(empId, myc[0], myc[1], myc[2], attendance, rates);
+        if (pay != null) pay.printRow();
+    }
+}

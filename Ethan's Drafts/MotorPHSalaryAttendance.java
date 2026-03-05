@@ -11,9 +11,7 @@ public class MotorPHSalaryAttendance {
     private static final String DATABASE_CSV   = "Employee Database.csv";
     private static final String SSS_CSV        = "SSS Deduction.csv";
 
-    // =========================================================
-    // INNER CLASSES
-    // =========================================================
+    /* Classes*/
 
     static class HoursWorked {
         int attendDay;
@@ -184,9 +182,7 @@ public class MotorPHSalaryAttendance {
         }
     }
 
-    // =========================================================
-    // PARSING HELPERS
-    // =========================================================
+    /* Parsing Functions */
 
     private static double parseTime(String raw) {
         raw = raw.trim();
@@ -208,9 +204,7 @@ public class MotorPHSalaryAttendance {
         return new int[]{day, month, year};
     }
 
-    // =========================================================
-    // INPUT PROMPT HELPERS
-    // =========================================================
+    /* Prompt helpers + Error Returns */
 
     private static Integer promptMonth(Scanner input) {
         while (true) {
@@ -322,9 +316,7 @@ public class MotorPHSalaryAttendance {
         input.nextLine();
     }
 
-    // =========================================================
-    // DATA LOADERS
-    // =========================================================
+    /* CSV Scanners */
 
     public static Map<String, List<AttendanceRecord>> loadAttendance(int maxRows) {
         Map<String, List<AttendanceRecord>> map = new LinkedHashMap<>();
@@ -420,9 +412,7 @@ public class MotorPHSalaryAttendance {
         return brackets;
     }
 
-    // =========================================================
-    // ATTENDANCE DISPLAY
-    // =========================================================
+    // Display for Attendance //
 
     public static void displayAttendanceSummary(String employeeId,
                                                 Map<String, List<AttendanceRecord>> attendance,
@@ -483,9 +473,7 @@ public class MotorPHSalaryAttendance {
         }
     }
 
-    // =========================================================
-    // SALARY COMPUTATION
-    // =========================================================
+    /* Display for Salary Computation and Deductions */
 
     public static SemiMonthlyPay computePay(String employeeId,
                                             int targetMonth,
@@ -537,9 +525,7 @@ public class MotorPHSalaryAttendance {
         return pay;
     }
 
-    // =========================================================
-    // PORTALS
-    // =========================================================
+    /* Menu Selections */ 
 
     public static void runStaffPortal(Scanner input) {
         Map<String, List<AttendanceRecord>> attendance  = loadAttendance(5000);
@@ -637,9 +623,7 @@ public class MotorPHSalaryAttendance {
         }
     }
 
-    // =========================================================
-    // MAIN
-    // =========================================================
+    /* Log-in screen */
 
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);

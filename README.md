@@ -1,60 +1,107 @@
-🏢 MotorPH Payroll System: Milestone 2 | 
-Computer Programming 1 | Group 14 (H1101)
+This README has been fully updated to align with the latest logic, file-handling methods, and the strict naming convention (MO_IT101_Group14.java) of your source code.
 
-👥 Development Team
+CP1 - MS2 Source Code
+Basic Payroll Program (Group 14)
+This program reads employee information and attendance records from CSV files, calculates total hours worked per payroll cutoff, applies government deductions, and displays a comprehensive salary summary.
 
-1. Delos Santos, Q.L.
-2. Palayaban, M.
-3. Saga, G.M.
-4. Agbayani, E.Z.
-5. Elviña, J.N.
+How the Program Works
+Imports
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.Scanner;
 
-- Effort Estimation & Project Plan: https://docs.google.com/spreadsheets/d/14QEroycZBSs3QpdtPJ-ELushEXd8EPXep8-dBjpRDtk/edit?usp=sharing
+BufferedReader and FileReader: Used to read the CSV databases line by line.
 
-🚀 System Overview
+Scanner: Used to capture user credentials and menu selections.
 
-The MotorPH Payroll System is a Java console application designed to process bimonthly payroll. It uses a secure, role-based access system to ensure that sensitive salary information is accessible only to authorized payroll staff.
+Main Class and Method
+public class MO_IT101_Group14 {
+public static void main(String[] args) {
 
-🛠️ Key Features
+MO_IT101_Group14 is the main class.
 
-🔐 Role-Based Authentication
+main method handles the secure login system and routes users to either the Employee or Payroll Staff portal.
 
-- Employee Account: (Username: employee) Allows staff to view their basic profile details (ID, Name, and Birthday) while keeping payroll data private.
-- Staff Account: (Username: payroll_staff) Grants full access to process payroll for individuals or the entire company.
-- Security: Centralized password verification (12345) for all accounts.
+Credentials and Roles
+Username: employee or payroll_staff
 
-👤 Data Management (Hardcoded Data Layer)
+Password: 12345
 
-Unlike systems that rely on external files, this version uses internal Static Arrays for maximum portability and speed. It stores:
+The system uses Role-Based Access Control to determine which menu options are displayed.
 
-- Employee Metadata: IDs, Full Names, and Birthdays.
-- Financial Data: Hourly rates and pre-logged hours worked for two specific cut-off periods.
+File Paths and Scanner
+Employee Database.csv: Stores ID, Name, Birthday, and Hourly Rate.
 
-💰 Payroll Engine
+Employee Attendance Record.csv: Stores login/logout logs for June to December 2024.
 
-The system automates complex calculations per month:
-- Bimonthly Cut-offs and Gross pay calculation.
-- Gross pay calculation minus mandatory government deductions.
-- Deduction Logic: Automatic calculation of SSS (4.5%), PhilHealth (2%), Pag-IBIG (Fixed PHP 100), and Withholding Tax (10%).
+Scanner scanner = new Scanner(System.in); reads input from the terminal.
 
-💻 Technical Implementation
+Get Employee Number (Employee Portal)
+System.out.print("Enter your employee number: ");
 
-- Language: Java
-- Input Handling: java.util.Scanner for interactive terminal menus.
-- Formatting: System.out.printf for professional-grade currency and decimal alignment.
-- Error Handling: Custom logic to catch invalid menu selections and non-existent employee IDs.
+The program asks the user for their ID. It includes a regex validation (!employeeNumber.matches("\\d+")) to catch invalid characters immediately.
 
-🏃 How to Run
-1. Ensure you have JDK 8 or higher installed.
-2. Compile the file: javac MotorPH_PayrollSystem_Grp14.java
-3. Execute the program: java MotorPH_PayrollSystem_Grp14
+Read Employee Details
+try (BufferedReader reader = new BufferedReader(new FileReader("Employee Database.csv"))) {
 
-🛡️ Error Handling Mechanisms
-The system is programmed to terminate securely and notify the user if:
+Reads the CSV line by line, skipping the header.
 
-- Incorrect login credentials are provided.
-- An invalid menu number is selected.
-- An employee ID is entered that does not exist in the system's database.
-- Payroll could not be processed.
+Uses a Regex Split split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)") to correctly handle names that contain commas inside quotes.
 
-Note: This project is for academic purposes for Computer Programming 1.
+If the ID is found, it stores the name and birthday.
+
+Check if Employee Exists
+If the ID is not found in the CSV, the program displays: Access Denied: Employee number unidentified. and terminates securely.
+
+Payroll Processing (Staff Portal)
+The staff can choose to process One employee or All employees.
+
+Pre-Validation: For single employee processing, the system checks if the ID exists before asking for the month to avoid wasted input.
+
+Month Selection: Choices range from June (1) to December (7), plus "Show All Months" (8).
+
+Attendance Parsing & Calculation
+Grace Period & Limits: Logins are recognized starting at 8:00 AM. Logouts are capped at 5:00 PM (17:00).
+
+Lunch Break: The system automatically subtracts 1 hour for the lunch break.
+
+Cutoff Split: - Days 1-15 go to the First Cutoff.
+
+Days 16-31 go to the Second Cutoff.
+
+Deduction Engine
+Government deductions are calculated on the combined monthly gross:
+
+SSS: 4.5% of gross.
+
+PhilHealth: 3.0% (divided by 2).
+
+Pag-IBIG: Fixed PHP 100.00.
+
+Withholding Tax: A nested branching logic applies 20%, 25%, or 30% depending on the taxable income bracket.
+
+Display Payroll Summary
+System.out.printf("Gross Salary: %.3f\n", firstGross);
+
+First Cutoff: Shows Hours, Gross, and Net (Deductions are not yet applied).
+
+Second Cutoff: Shows Hours, Gross, an itemized list of all 4 deductions, and the final Net Salary.
+
+Notes
+CSV Location: Both Employee Database.csv and Employee Attendance Record.csv must be in the project’s root folder.
+
+Precision: All monetary values and hours are displayed at 3 decimal places for maximum accuracy.
+
+Security: The program uses System.exit(0) to ensure a clean and secure termination after errors or completion.
+
+Development Team (Group 14)
+
+Delos Santos, Q.L.
+
+Palayaban, M.
+
+Saga, G.M.
+
+Agbayani, E.Z.
+
+Elviña, J.N.

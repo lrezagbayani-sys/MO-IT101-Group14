@@ -1,152 +1,531 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.File;
-import java.util.Scanner;
+import java.io.BufferedReader; // Used to read text from a character-input stream
+import java.io.FileReader; // Used to read data from files
+import java.util.Scanner; // Used to capture user input from the console
 
-public class MotorPH_Payroll_Final {
+public class MO_IT101_Group14 { // Main class defined as requested
 
-    private static final String CSV_FILE = "src/employee_data.csv";
+    // Constant for option 1
+    public static final int OPTION_ONE = 1;
+    // Constant for option 2
+    public static final int OPTION_TWO = 2;
+    // Constant for option 3
+    public static final int OPTION_THREE = 3;
+    // Constant representing the maximum valid month option
+    public static final int OPTION_MAX_MONTH = 8;
 
+    // Main entry point of the program
     public static void main(String[] args) {
-        Scanner input = new Scanner(System.in);
-        System.out.println("=== MOTORPH PAYROLL SYSTEM ===");
+        // Create scanner to read console input
+        Scanner inputScanner = new Scanner(System.in);
+
+        // Ask for the username
         System.out.print("Username: ");
-        String username = input.nextLine();
+        // Read the username input
+        String usernameInput = inputScanner.nextLine().trim();
+
+        // Ask for the password
         System.out.print("Password: ");
-        String password = input.nextLine();
+        // Read the password input
+        String passwordInput = inputScanner.nextLine().trim();
 
-        if (password.equals("12345")) {
-            if (username.equalsIgnoreCase("payroll_staff")) {
-                System.out.println("\nLogin Successful! Welcome, Payroll Staff.");
-                runStaffPortal(input);
-            } else if (username.equalsIgnoreCase("employee")) {
-                System.out.println("\nLogin Successful! Welcome, MotorPH Employee.");
-                runEmployeePortal(input);
+        // Validate the credentials strictly
+        if (passwordInput.equals("12345") && (usernameInput.equals("employee") || usernameInput.equals("payroll_staff"))) {
+            // Display successful login if employee
+            if (usernameInput.equals("employee")) {
+                // Welcome message for employee
+                System.out.println("Login Successful! \n\n--- Welcome, MotorPH Employee! ---");
+                // Route to employee portal
+                processEmployeePortal(inputScanner);
+                // Display successful login if staff
             } else {
-                System.out.println("\nAccess Denied: Incorrect login details.");
-                System.out.println("Program Terminated.");
+                // Welcome message for staff
+                System.out.println("Login Successful! \n\n--- Welcome, MotorPH Payroll Staff! ---");
+                // Route to staff portal
+                processStaffPortal(inputScanner);
             }
+            // Condition if login fails
         } else {
-            System.out.println("\nAccess Denied: Incorrect login details.");
-            System.out.println("Program Terminated.");
+            // Display strict error message for invalid login
+            System.out.println("\nAccess Denied: Invalid login credentials. Please try again.");
+            // Display termination message
+            System.out.println("\nPROGRAM TERMINATED.");
+            // Terminate program securely
+            System.exit(0);
         }
-        input.close();
     }
 
-    public static void runStaffPortal(Scanner input) {
-        System.out.println("\n[MOTORPH PAYROLL STAFF PORTAL]");
-        System.out.println("Select One (1) Option:");
-        System.out.println("1. Process Payroll for One Employee");
-        System.out.println("2. Process Payroll for All Employees");
-        System.out.println("3. Exit Program");
-        System.out.print("Choice: ");
-        String choice = input.nextLine();
+    // Procedural method for the Employee Portal
+    public static void processEmployeePortal(Scanner scanner) {
+        // Display options for the employee
+        System.out.println("[1] Enter your employee number");
+        // Display exit option
+        System.out.println("[2] Exit the program");
+        // Ask for option
+        System.out.print("Select option: ");
+        // Read the chosen option
+        String optionChoice = scanner.nextLine().trim();
 
-        if (choice.equals("1")) {
-            System.out.print("Enter Employee Number: ");
-            displayStaffView(input.nextLine());
-        } else if (choice.equals("2")) {
-            processAll();
-        } else {
+        // Check if option 1 was selected
+        if (optionChoice.equals(String.valueOf(OPTION_ONE))) {
+            // Ask for employee number
+            System.out.print("Enter your employee number: ");
+            // Read the employee number
+            String employeeNumber = scanner.nextLine().trim();
+
+            // --- VALIDATION FOR INVALID CHARACTERS ---
+            if (!employeeNumber.matches("\\d+")) {
+                // Print constraint for non-numerical characters
+                System.out.println("\nAccess Denied: Invalid characters identified. Please select one numerical symbol from the options above.");
+                // Print termination string
+                System.out.println("\nPROGRAM TERMINATED.");
+                // Terminate
+                System.exit(0);
+            }
+
+            // Initialize variable to hold employee name
+            String employeeName = "";
+            // Initialize variable to hold employee birthday
+            String employeeBirthday = "";
+            // Flag to check if employee exists
+            boolean isFound = false;
+
+            // Try block to read the CSV file
+            try (BufferedReader reader = new BufferedReader(new FileReader("Employee Database.csv"))) {
+                // Skip the header line of the CSV
+                reader.readLine();
+                // Variable to hold each line
+                String currentLine;
+
+                // Loop through all lines in the file
+                while ((currentLine = reader.readLine()) != null) {
+                    // Split the comma-separated values properly ignoring commas in quotes
+                    String[] employeeData = currentLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                    // Check if the current line matches the inputted employee number
+                    if (employeeData[0].trim().equals(employeeNumber)) {
+                        // Assign the full name by concatenating last and first name
+                        employeeName = employeeData[2].replace("\"", "").trim() + " " + employeeData[1].replace("\"", "").trim();
+                        // Assign the birthday value
+                        employeeBirthday = employeeData[3].trim();
+                        // Mark as found
+                        isFound = true;
+                        // Break out of the loop since employee is found
+                        break;
+                    }
+                }
+                // Catch any file reading errors
+            } catch (Exception exception) {
+                // Print standard error message
+                System.out.println("\nError reading Employee Database.csv");
+            }
+
+            // If employee was not found in the loop
+            if (!isFound) {
+                // Print strict unidentified ID message
+                System.out.println("\nAccess Denied: Employee number unidentified. Please check the number again.");
+                // Print termination string
+                System.out.println("\nPROGRAM TERMINATED.");
+                // Exit system
+                System.exit(0);
+            }
+
+            // Display employee details header with spacing
+            System.out.println("\n— MOTORPH EMPLOYEE DETAILS —");
+            // Display the employee number
+            System.out.println("1. Employee #: " + employeeNumber);
+            // Display the employee name
+            System.out.println("2. Name: " + employeeName);
+            // Display the employee birthday
+            System.out.println("3. Birthday: " + employeeBirthday);
+            // Print visual separator
+            System.out.println("\n—-------------------------------------------------------");
+            // Display standard farewell message
             System.out.println("\nThank you for using the MotorPH Payroll System!");
-            System.out.println("Program Terminated.");
-        }
-    }
 
-    public static void runEmployeePortal(Scanner input) {
-        System.out.println("\n[MOTORPH EMPLOYEE PORTAL]");
-        System.out.println("Select One (1) Option:");
-        System.out.println("1. View My Employee Details");
-        System.out.println("2. Exit Program");
-        System.out.print("Choice: ");
-        String choice = input.nextLine();
-
-        if (choice.equals("1")) {
-            System.out.print("Enter Your Employee Number: ");
-            displayEmployeeView(input.nextLine());
-        } else {
+            // Check if option 2 was selected
+        } else if (optionChoice.equals(String.valueOf(OPTION_TWO))) {
+            // Display standard farewell message
             System.out.println("\nThank you for using the MotorPH Payroll System!");
-            System.out.println("Program Terminated.");
+            // Terminate program
+            System.exit(0);
+            // If an invalid option was entered
+        } else {
+            // Identify if input is blank or non-numeric
+            if (optionChoice.isEmpty() || !optionChoice.matches("\\d+")) {
+                // Print string constraint for non-numerical
+                System.out.println("\nAccess Denied: Invalid characters identified. Please select one numerical symbol from the options above.");
+                // If numerical but invalid
+            } else {
+                // Print string constraint for wrong numerical
+                System.out.println("\nAccess Denied: Invalid option identified. Please select one numerical symbol from the options.");
+            }
+            // Print termination string
+            System.out.println("\nPROGRAM TERMINATED.");
+            // Terminate program
+            System.exit(0);
         }
     }
 
-    // ONLY SHOWS BASIC INFO - FOR EMPLOYEES
-    public static void displayEmployeeView(String id) {
-        try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
-            String line;
-            br.readLine(); 
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-                if (data[1].trim().equals(id.trim())) {
-                    System.out.println("\n--- Employee Records ---");
-                    System.out.println("Employee #: " + data[1]);
-                    System.out.println("2. Employee Name: " + data[2]);
-                    System.out.println("3. Birthday: " + data[3]);
-                    System.out.println("\nThank you for using the MotorPH Payroll System!");
-                    System.out.println("Program Terminated.");
-                    return;
+    // Procedural method for the Payroll Staff Portal
+    public static void processStaffPortal(Scanner scanner) {
+        // Display Process Payroll option
+        System.out.println("[1] Process Payroll");
+        // Display Exit option
+        System.out.println("[2] Exit the program");
+        // Ask for choice
+        System.out.print("Select option: ");
+        // Read the staff choice
+        String staffChoice = scanner.nextLine().trim();
+
+        // If exit was chosen
+        if (staffChoice.equals(String.valueOf(OPTION_TWO))) {
+            // Display farewell
+            System.out.println("\nThank you for using the MotorPH Payroll System!");
+            // Terminate
+            System.exit(0);
+            // If an invalid option was chosen
+        } else if (!staffChoice.equals(String.valueOf(OPTION_ONE))) {
+            // Print error constraint
+            System.out.println("\nAccess Denied: Invalid option identified. Please select one numerical symbol from the options.");
+            // Print termination message
+            System.out.println("\nPROGRAM TERMINATED.");
+            // Terminate
+            System.exit(0);
+        }
+
+        // Display sub-options for processing with requested spacing
+        System.out.println("\n[1] One employee");
+        // Display all employees option
+        System.out.println("[2] All employees");
+        // Display exit sub-option
+        System.out.println("[3] Exit the program");
+        // Ask for choice
+        System.out.print("Select option: ");
+        // Read the sub-option choice
+        String subChoice = scanner.nextLine().trim();
+
+        // Determine branch based on subChoice
+        if (subChoice.equals(String.valueOf(OPTION_ONE))) {
+            // Prompt for employee number
+            System.out.print("Enter the employee number: ");
+            // Read specific employee number
+            String targetEmployee = scanner.nextLine().trim();
+            // Pass to payroll processor flag true for single
+            processPayrollData(scanner, targetEmployee, true);
+            // If processing all employees
+        } else if (subChoice.equals(String.valueOf(OPTION_TWO))) {
+            // Pass to payroll processor flag false for all
+            processPayrollData(scanner, "ALL", false);
+            // If exit was selected
+        } else if (subChoice.equals(String.valueOf(OPTION_THREE))) {
+            // Display farewell
+            System.out.println("\nThank you for using the MotorPH Payroll System!");
+            // Terminate
+            System.exit(0);
+            // If an invalid sub-option was entered
+        } else {
+            // Error handling for wrong input
+            System.out.println("\nAccess Denied: Invalid option identified. Please select one numerical symbol from the options.");
+            // Termination message
+            System.out.println("\nPROGRAM TERMINATED.");
+            // System exit
+            System.exit(0);
+        }
+    }
+
+    // Core procedural method handling file parsing and calculation
+    public static void processPayrollData(Scanner scanner, String targetEmployee, boolean isSingleEmployee) {
+
+        // --- PRE-VALIDATION CHECK FOR SINGLE EMPLOYEE ---
+        boolean targetFoundPremature = false;
+        if (isSingleEmployee) {
+            // Validate characters first for Payroll Staff side too
+            if (!targetEmployee.matches("\\d+")) {
+                System.out.println("\nAccess Denied: Invalid characters identified. Please select one numerical symbol from the options above.");
+                System.out.println("\nPROGRAM TERMINATED.");
+                System.exit(0);
+            }
+
+            try (BufferedReader reader = new BufferedReader(new FileReader("Employee Database.csv"))) {
+                reader.readLine();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.split(",")[0].trim().equals(targetEmployee)) {
+                        targetFoundPremature = true;
+                        break;
+                    }
+                }
+            } catch (Exception e) {}
+
+            if (!targetFoundPremature) {
+                System.out.println("\nAccess Denied: Invalid employee number. Please try again.");
+                System.out.println("\nPROGRAM TERMINATED.");
+                System.exit(0);
+            }
+        }
+
+        // Display month selection menu
+        System.out.println("Select the month to process payroll:");
+        // June option
+        System.out.println("1. June");
+        // July option
+        System.out.println("2. July");
+        // August option
+        System.out.println("3. August");
+        // September option
+        System.out.println("4. September");
+        // October option
+        System.out.println("5. October");
+        // November option
+        System.out.println("6. November");
+        // December option
+        System.out.println("7. December");
+
+        // If single employee, offer Show All option
+        if (isSingleEmployee) {
+            // Display Show All
+            System.out.println("8. Show All Months");
+        }
+
+        // Prompt for month choice
+        System.out.print("Select option: ");
+        // Read choice
+        String monthChoiceStr = scanner.nextLine().trim();
+        // Variable to hold integer parsed choice
+        int monthChoice = 0;
+
+        // Try to parse the choice to integer
+        try {
+            // Parse string to int
+            monthChoice = Integer.parseInt(monthChoiceStr);
+            // Catch parsing failure
+        } catch (NumberFormatException exception) {
+            // Print strict constraint for non-numerical
+            System.out.println("\nAccess Denied: Invalid characters identified. Please select one numerical symbol from the options above.");
+            // Print termination
+            System.out.println("\nPROGRAM TERMINATED.");
+            // Exit safely
+            System.exit(0);
+        }
+
+        // Check if the input is within valid boundary
+        if (monthChoice < 1 || (isSingleEmployee && monthChoice > 8) || (!isSingleEmployee && monthChoice > 7)) {
+            // Invalid selection handling
+            System.out.println("\nAccess Denied: Invalid option identified. Please select one numerical symbol from the options.");
+            // Display termination
+            System.out.println("\nPROGRAM TERMINATED.");
+            // Exit
+            System.exit(0);
+        }
+
+        // We will collect all employee IDs to process into a primitive array (NO COLLECTIONS/LISTS)
+        String[] employeeIdsToProcess = new String[50];
+        // Array to store names
+        String[] employeeNamesToProcess = new String[50];
+        // Array to store birthdays
+        String[] employeeBirthdaysToProcess = new String[50];
+        // Array to store hourly rates
+        double[] employeeRatesToProcess = new double[50];
+        // Counter for how many employees are valid
+        int employeeCount = 0;
+
+        // Read Employee Database directly
+        try (BufferedReader reader = new BufferedReader(new FileReader("Employee Database.csv"))) {
+            // Skip header
+            reader.readLine();
+            // Variable for current line
+            String currentLine;
+
+            // Read line by line
+            while ((currentLine = reader.readLine()) != null) {
+                // Ignore empty lines
+                if (currentLine.trim().isEmpty()) continue;
+                // Split standard comma separated values
+                String[] employeeData = currentLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                // Extract employee ID
+                String id = employeeData[0].trim();
+
+                // Check if we are adding all or just the specific one
+                if (!isSingleEmployee || id.equals(targetEmployee)) {
+                    // Add ID to array
+                    employeeIdsToProcess[employeeCount] = id;
+                    // Add combined name to array
+                    employeeNamesToProcess[employeeCount] = employeeData[2].replace("\"", "").trim() + " " + employeeData[1].replace("\"", "").trim();
+                    // Add birthday
+                    employeeBirthdaysToProcess[employeeCount] = employeeData[3].trim();
+                    // Clean comma from hourly rate string
+                    String rateString = employeeData[employeeData.length - 1].replace("\"", "").replace(",", "").trim();
+                    // Parse double value for rate
+                    employeeRatesToProcess[employeeCount] = Double.parseDouble(rateString);
+                    // Increment counter
+                    employeeCount++;
                 }
             }
-            System.out.println("\nAccess Denied: Employee # does not exist.");
-            System.out.println("Program Terminated.");
+            // Catch exceptions during DB read
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            // Print error fallback
+            System.out.println("\nError reading Employee Database.");
         }
-    }
 
-    // SHOWS FULL PAYROLL 1-17 - FOR STAFF ONLY
-    public static void displayStaffView(String id) {
-        try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
-            String line;
-            br.readLine(); 
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-                if (data[1].trim().equals(id.trim())) {
-                    System.out.println("\n--- Employee Records ---");
-                    System.out.println("1. Employee #: " + data[1]);
-                    System.out.println("2. Employee Name: " + data[2]);
-                    System.out.println("3. Birthday: " + data[3]);
+        // Determine start and end constraints for the month loop based on input
+        int startMonthLoop = (monthChoice == 8) ? 6 : (monthChoice + 5);
+        // Determine the end constraints
+        int endMonthLoop = (monthChoice == 8) ? 12 : (monthChoice + 5);
 
-                    double rate = Double.parseDouble(data[16].replace("\"", "").replace(",", ""));
-                    double totalHours = Double.parseDouble(data[15].replace("\"", "").replace(",", ""));
-                    double halfHours = totalHours / 2;
-                    double grossHalf = rate * halfHours;
+        // Process sequentially for every targeted employee in our static array size
+        for (int empIndex = 0; empIndex < employeeCount; empIndex++) {
+            // Extract the current ID context
+            String currentEmpId = employeeIdsToProcess[empIndex];
+            // Print employee details header
+            System.out.println("\n— MOTORPH EMPLOYEE DETAILS —");
+            // Print the ID
+            System.out.println("1. Employee #: " + currentEmpId);
+            // Print the Name
+            System.out.println("2. Name: " + employeeNamesToProcess[empIndex]);
+            // Print the Birthday
+            System.out.println("3. Birthday: " + employeeBirthdaysToProcess[empIndex]);
+            // Print spacing header for payroll details
+            System.out.println("\n— MOTORPH PAYROLL DETAILS —");
 
-                    double sss = Double.parseDouble(data[7].replace("\"", "").replace(",", ""));
-                    double phil = Double.parseDouble(data[8].replace("\"", "").replace(",", ""));
-                    double pagibig = Double.parseDouble(data[9].replace("\"", "").replace(",", ""));
-                    double tax = Double.parseDouble(data[10].replace("\"", "").replace(",", ""));
-                    double totalDeductions = sss + phil + pagibig + tax;
+            // Loop through selected month/months
+            for (int actualMonth = startMonthLoop; actualMonth <= endMonthLoop; actualMonth++) {
+                // Variable to hold hours for first cutoff
+                double firstCutoffHours = 0.0;
+                // Variable to hold hours for second cutoff
+                double secondCutoffHours = 0.0;
 
-                    System.out.println("4. Cutoff Date: June 1 to June 15");
-                    System.out.println("5. Total Hours Worked: " + String.format("%.2f", halfHours));
-                    System.out.println("6. Gross Salary: PHP " + String.format("%.2f", grossHalf));
-                    System.out.println("7. Net Salary: PHP " + String.format("%.2f", grossHalf));
-                    System.out.println("8. Cutoff Date: June 16 to June 30 (Second payout includes all deductions)");
-                    System.out.println("9. Total Hours Worked: " + String.format("%.2f", halfHours));
-                    System.out.println("10. Gross Salary: PHP " + String.format("%.2f", grossHalf));
-                    System.out.println("11. Each Deduction:");
-                    System.out.println("12.   SSS: PHP " + data[7].replace("\"", ""));
-                    System.out.println("13.   PhilHealth: PHP " + data[8].replace("\"", ""));
-                    System.out.println("14.   Pag-IBIG: PHP " + data[9].replace("\"", ""));
-                    System.out.println("15.   Tax: PHP " + data[10].replace("\"", ""));
-                    System.out.println("16. Total Deductions: PHP " + String.format("%.2f", totalDeductions));
-                    System.out.println("17. Net Salary: PHP " + String.format("%.2f", (grossHalf - totalDeductions)));
+                // Read attendance dynamically inside the loop
+                try (BufferedReader reader = new BufferedReader(new FileReader("Employee Attendance Record.csv"))) {
+                    // Skip header
+                    reader.readLine();
+                    // Holds active string line
+                    String currentLine;
 
-                    System.out.println("\nComputation Successful. Thank you for using the MotorPH Payroll System!");
-                    System.out.println("Program Terminated.");
-                    return;
+                    // Loop while rows exist
+                    while ((currentLine = reader.readLine()) != null) {
+                        // Ignore empty rows
+                        if (currentLine.trim().isEmpty()) continue;
+                        // Split row into components
+                        String[] attendanceData = currentLine.split(",");
+
+                        // Check if row pertains to our current employee
+                        if (!attendanceData[0].trim().equals(currentEmpId)) continue;
+
+                        // Parse the date (Format: MM/DD/YYYY)
+                        String[] dateParts = attendanceData[3].trim().split("/");
+                        // Extract month integer
+                        int recordMonth = Integer.parseInt(dateParts[0]);
+                        // Extract day integer
+                        int recordDay = Integer.parseInt(dateParts[1]);
+
+                        // Proceed only if the record falls in the current active target month
+                        if (recordMonth == actualMonth) {
+                            // Extract login hour segment
+                            String[] loginTime = attendanceData[4].trim().split(":");
+                            // Extract logout hour segment
+                            String[] logoutTime = attendanceData[5].trim().split(":");
+
+                            // Convert login to fractional double value
+                            double loginDouble = Double.parseDouble(loginTime[0]) + (Double.parseDouble(loginTime[1]) / 60.0);
+                            // Convert logout to fractional double value
+                            double logoutDouble = Double.parseDouble(logoutTime[0]) + (Double.parseDouble(logoutTime[1]) / 60.0);
+
+                            // Apply strict constraint: Minimum time recognized is 8:00 AM
+                            double effectiveLogin = Math.max(loginDouble, 8.0);
+                            // Apply strict constraint: Maximum time recognized is 5:00 PM (17:00)
+                            double effectiveLogout = Math.min(logoutDouble, 17.0);
+
+                            // Compute hours ignoring extra hours and subtracting 1 hour break
+                            double dailyHours = (effectiveLogout - effectiveLogin) - 1.0;
+                            // Ensure negative numbers fallback to 0
+                            if (dailyHours < 0) dailyHours = 0;
+
+                            // Distribute calculated daily hours to exact cutoff period
+                            if (recordDay >= 1 && recordDay <= 15) {
+                                // Increment first cutoff
+                                firstCutoffHours += dailyHours;
+                                // Anything past 15 goes to second cutoff
+                            } else {
+                                // Increment second cutoff
+                                secondCutoffHours += dailyHours;
+                            }
+                        }
+                    }
+                } catch (Exception e) {}
+
+                // Calculate Gross Salary for Cutoff 1 maintaining precise decimals
+                double firstGross = firstCutoffHours * employeeRatesToProcess[empIndex];
+                // Calculate Gross Salary for Cutoff 2 maintaining precise decimals
+                double secondGross = secondCutoffHours * employeeRatesToProcess[empIndex];
+
+                // Combined monthly gross for government deductions
+                double combinedMonthlyGross = firstGross + secondGross;
+
+                // Declare deduction variables locally
+                double sssDeduction = 0.0;
+                double philhealthDeduction = 0.0;
+                double pagibigDeduction = 0.0;
+                double taxDeduction = 0.0;
+
+                // Only compute taxes and deductions if there is actual combined income
+                if (combinedMonthlyGross > 0) {
+                    // Placeholder logic for deductions based on typical MotorPH rules
+                    pagibigDeduction = 100.0;
+                    philhealthDeduction = (combinedMonthlyGross * 0.03) / 2;
+                    sssDeduction = combinedMonthlyGross * 0.045;
+
+                    // Deduct contributions to get Taxable Income
+                    double taxableIncome = combinedMonthlyGross - (sssDeduction + philhealthDeduction + pagibigDeduction);
+
+                    // Apply strict procedural nested branching for withholding tax
+                    if (taxableIncome > 20832 && taxableIncome <= 33333) {
+                        taxDeduction = (taxableIncome - 20833) * 0.20;
+                    } else if (taxableIncome > 33333 && taxableIncome <= 66667) {
+                        taxDeduction = 2500 + ((taxableIncome - 33333) * 0.25);
+                    } else if (taxableIncome > 66667) {
+                        taxDeduction = 10833 + ((taxableIncome - 66667) * 0.30);
+                    }
                 }
-            }
-            System.out.println("\nAccess Denied: Employee # does not exist.");
-            System.out.println("Program Terminated.");
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
 
-    public static void processAll() {
-        System.out.println("\nProcessing all records...");
-        // This can call displayStaffView in a loop if needed
+                // Net Salaries
+                double netSalaryCutoff1 = firstGross;
+                double totalDeductions = sssDeduction + philhealthDeduction + pagibigDeduction + taxDeduction;
+                double netSalaryCutoff2 = secondGross - totalDeductions;
+
+                // Month string mapping
+                String monthNameStr = "";
+                switch (actualMonth) {
+                    case 6: monthNameStr = "June"; break;
+                    case 7: monthNameStr = "July"; break;
+                    case 8: monthNameStr = "August"; break;
+                    case 9: monthNameStr = "September"; break;
+                    case 10: monthNameStr = "October"; break;
+                    case 11: monthNameStr = "November"; break;
+                    case 12: monthNameStr = "December"; break;
+                }
+
+                // --- Print First Cutoff ---
+                System.out.println("1. Cutoff Date: " + monthNameStr + " 1 to " + monthNameStr + " 15");
+                System.out.printf("2. Total Hours Worked: %.3f\n", firstCutoffHours);
+                System.out.printf("3. Gross Salary: %.3f\n", firstGross);
+                System.out.printf("4. Net Salary: %.3f\n\n", netSalaryCutoff1);
+
+                // --- Print Second Cutoff ---
+                System.out.println("1. Cutoff Date: " + monthNameStr + " 16 to " + monthNameStr + " 30/31 (Second payout includes all deductions)");
+                System.out.printf("2. Total Hours Worked: %.3f\n", secondCutoffHours);
+                System.out.printf("3. Gross Salary: %.3f\n", secondGross);
+                System.out.println("4. Each Deduction:");
+                System.out.printf("- SSS: %.3f\n", sssDeduction);
+                System.out.printf("- PhilHealth: %.3f\n", philhealthDeduction);
+                System.out.printf("- Pag-IBIG: %.3f\n", pagibigDeduction);
+                System.out.printf("- Withholding Tax: %.3f\n", taxDeduction);
+                System.out.printf("5. Total Deductions: %.3f\n", totalDeductions);
+                System.out.printf("6. Net Salary: %.3f\n\n", netSalaryCutoff2);
+            }
+        }
+
+        // Final footer spacing
+        System.out.println("—-------------------------------------------------------");
+        System.out.println("\nPayroll Processed Successfully.\n\nThank you for using the MotorPH Payroll System!");
+        System.exit(0);
     }
 }

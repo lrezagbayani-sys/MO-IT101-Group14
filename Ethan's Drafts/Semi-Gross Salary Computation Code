@@ -9,14 +9,13 @@ public class MotorPHSalary {
 
     private static final String ATTENDANCE_CSV = "Employee Attendance Record.csv";
     private static final String DATABASE_CSV   = "Employee Database.csv";
+    private static final String SSS_CSV        = "SSS Deduction.csv";
 
     static class HourlyRate {
         String employeeId;
         String firstName;
         String lastName;
         double ratePerHour;
-        //double grossSalary
-        //double deduction (Add ko ng other variables for this)
 
         public HourlyRate(String employeeId, String lastName, String firstName, double ratePerHour) {
             if (ratePerHour < 0) throw new IllegalArgumentException("Rate cannot be negative");
@@ -41,15 +40,88 @@ public class MotorPHSalary {
         double hourlyRate;
         double grossPay;
 
-        public static void printHeader() {
-            System.out.printf("%-12s %-15s %-15s %-12s %-14s %-15s%n",
-                    "Employee #", "First Name", "Last Name", "Hourly Rate", "Hours Worked", "Cut-Off Salary");
-            System.out.println("--------------------------------------------------------------------------------");
+        /* this is variables for deductions */
+        double pagibigDeduction;
+        double philhealthDeduction;
+        double sssDeduction;
+        double taxDeduction;
+        double totalDeduction;
+        double netPay;
+
+        private static double computePagibig(double gross) {
+            if (gross >= 1000 && gross <= 1500) return gross * 0.03;
+            if (gross > 1500)                   return gross * 0.04;
+            return 0;
+        }
+
+        private static double computePhilhealth(double gross) {
+            return gross * 0.03;
+        }
+
+        private static double computeSSS(double gross, List<double[]> sssBrackets) {
+            for (double[] bracket : sssBrackets) {
+                double min       = bracket[0];
+                double max       = bracket[1];
+                double deduction = bracket[2];
+                if (gross >= min && gross <= max) return deduction;
+            }
+            return 0;
+        }
+
+        private static double computeTax(double gross) {
+            if (gross <= 20832)                        return 0;
+            if (gross <= 33332)                        return gross * 0.20;
+            if (gross <= 66666)                        return 2500 + gross * 0.25;
+            if (gross <= 166666)                       return 10833 + gross * 0.30;
+            return 10833 + gross * 0.30; 
+        }
+
+        public void applyDeductions(List<double[]> sssBrackets) {
+            if (cutoff != 2) {
+                pagibigDeduction    = 0;
+                philhealthDeduction = 0;
+                sssDeduction        = 0;
+                taxDeduction        = 0;
+                totalDeduction      = 0;
+                netPay              = grossPay;
+                return;
+            }
+
+            pagibigDeduction    = computePagibig(grossPay);
+            philhealthDeduction = computePhilhealth(grossPay);
+            sssDeduction        = computeSSS(grossPay, sssBrackets);
+            taxDeduction        = computeTax(grossPay);
+
+            totalDeduction = pagibigDeduction + philhealthDeduction + sssDeduction + taxDeduction;
+            netPay         = grossPay - totalDeduction;
+        }
+
+        public static void printHeader(int cutoff) {
+            if (cutoff == 1) {
+                System.out.printf("%-12s %-15s %-15s %-12s %-14s %-15s%n",
+                        "Employee #", "First Name", "Last Name",
+                        "Hourly Rate", "Hours Worked", "Gross Pay");
+            } else {
+                System.out.printf("%-12s %-15s %-15s %-12s %-14s %-15s %-12s %-14s %-10s %-15s %-15s%n",
+                        "Employee #", "First Name", "Last Name",
+                        "Hourly Rate", "Hours Worked", "Gross Pay",
+                        "Pag-IBIG", "PhilHealth", "SSS", "Tax", "Net Pay");
+            }
+            System.out.println("-".repeat(cutoff == 1 ? 80 : 145));
         }
 
         public void printRow() {
-            System.out.printf("%-12s %-15s %-15s %-12.2f %-14.2f PHP %.2f%n",
-                    employeeId, firstName, lastName, hourlyRate, hoursWorked, grossPay);
+            if (cutoff == 1) {
+                System.out.printf("%-12s %-15s %-15s %-12.2f %-14.2f PHP %.2f%n",
+                        employeeId, firstName, lastName,
+                        hourlyRate, hoursWorked, grossPay);
+            } else {
+                System.out.printf("%-12s %-15s %-15s %-12.2f %-14.2f %-15.2f %-12.2f %-14.2f %-10.2f %-15.2f PHP %.2f%n",
+                        employeeId, firstName, lastName,
+                        hourlyRate, hoursWorked, grossPay,
+                        pagibigDeduction, philhealthDeduction, sssDeduction,
+                        taxDeduction, netPay);
+            }
         }
     }
 
@@ -127,6 +199,32 @@ public class MotorPHSalary {
         return map;
     }
 
+    public static List<double[]> loadSssBrackets() {
+        List<double[]> brackets = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(SSS_CSV))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                String[] cols = line.split(",");
+                if (cols.length < 3) continue;
+
+                try {
+                    double min       = Double.parseDouble(cols[0].trim());
+                    double max       = Double.parseDouble(cols[1].trim());
+                    double deduction = Double.parseDouble(cols[2].trim());
+                    brackets.add(new double[]{min, max, deduction});
+                } catch (Exception ignored) {}
+            }
+        } catch (Exception e) {
+            System.out.println("  [!] Error loading SSS deduction file: " + e.getMessage());
+        }
+
+        return brackets;
+    }
+
     private static double parseTime(String raw) {
         raw = raw.trim();
         if (raw.contains(":")) {
@@ -143,7 +241,8 @@ public class MotorPHSalary {
                                             int targetYear,
                                             int cutoff,
                                             Map<String, List<double[]>> attendanceHours,
-                                            Map<String, HourlyRate> hourlyRates) {
+                                            Map<String, HourlyRate> hourlyRates,
+                                            List<double[]> sssBrackets) {
 
         HourlyRate rate = hourlyRates.get(employeeId);
         if (rate == null) {
@@ -181,6 +280,8 @@ public class MotorPHSalary {
         pay.hourlyRate  = rate.getRatePerHour();
         pay.hoursWorked = totalHours;
         pay.grossPay    = totalHours * rate.getRatePerHour();
+
+        pay.applyDeductions(sssBrackets);
 
         return pay;
     }
@@ -223,9 +324,9 @@ public class MotorPHSalary {
     }
 
     private static int[] getMonthYearCutoff(Scanner input) {
-        int month  = promptInt(input, "Enter Month (1-12): ",                          1,    12);
-        int year   = promptInt(input, "Enter Year (4-digit): ",                     1900,  9999);
-        int cutoff = promptInt(input, "Enter Cutoff (1 = Days 1-16 | 2 = Days 17-30): ", 1,  2);
+        int month  = promptInt(input, "Enter Month (1-12): ",                              1,    12);
+        int year   = promptInt(input, "Enter Year (4-digit): ",                         1900,  9999);
+        int cutoff = promptInt(input, "Enter Cutoff (1 = Days 1-16 | 2 = Days 17-31): ",  1,     2);
         return new int[]{month, year, cutoff};
     }
 
@@ -257,6 +358,7 @@ public class MotorPHSalary {
     public static void runStaffPortal(Scanner input) {
         Map<String, HourlyRate>     rates      = loadHourlyRates();
         Map<String, List<double[]>> attendance = loadAttendanceHours(5000);
+        List<double[]>              sssBrackets = loadSssBrackets();
 
         System.out.println("\n[MOTORPH STAFF - SALARY VIEWER]");
         System.out.println("1. View Salary Computation");
@@ -271,14 +373,15 @@ public class MotorPHSalary {
                 String empId = input.nextLine().trim();
                 int[] myc = getMonthYearCutoff(input);
 
-                SemiMonthlyPay.printHeader();
+                SemiMonthlyPay.printHeader(myc[2]);
+
                 if (empId.equalsIgnoreCase("All")) {
                     for (String id : attendance.keySet()) {
-                        SemiMonthlyPay pay = computePay(id, myc[0], myc[1], myc[2], attendance, rates);
+                        SemiMonthlyPay pay = computePay(id, myc[0], myc[1], myc[2], attendance, rates, sssBrackets);
                         if (pay != null) pay.printRow();
                     }
                 } else {
-                    SemiMonthlyPay pay = computePay(empId, myc[0], myc[1], myc[2], attendance, rates);
+                    SemiMonthlyPay pay = computePay(empId, myc[0], myc[1], myc[2], attendance, rates, sssBrackets);
                     if (pay != null) pay.printRow();
                 }
                 break;
@@ -290,14 +393,15 @@ public class MotorPHSalary {
     public static void runEmployeePortal(Scanner input) {
         Map<String, HourlyRate>     rates      = loadHourlyRates();
         Map<String, List<double[]>> attendance = loadAttendanceHours(5000);
+        List<double[]>              sssBrackets = loadSssBrackets();
 
         System.out.println("\n[MOTORPH EMPLOYEE - SALARY VIEWER]");
         System.out.print("Enter Your Employee Number: ");
         String empId = input.nextLine().trim();
         int[] myc = getMonthYearCutoff(input);
 
-        SemiMonthlyPay.printHeader();
-        SemiMonthlyPay pay = computePay(empId, myc[0], myc[1], myc[2], attendance, rates);
+        SemiMonthlyPay.printHeader(myc[2]);
+        SemiMonthlyPay pay = computePay(empId, myc[0], myc[1], myc[2], attendance, rates, sssBrackets);
         if (pay != null) pay.printRow();
     }
 }

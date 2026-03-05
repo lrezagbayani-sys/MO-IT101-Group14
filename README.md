@@ -29,6 +29,7 @@ This program reads employee information and attendance records from CSV files, c
 ### **External Files**
 * `Employee Database.csv`: Stores ID, Name, Birthday, and Hourly Rate.
 * `Employee Attendance Record.csv`: Stores logs for June to December 2024.
+* `SSS Deductions.csv`: Stores SSS Deductions rules and bracket.
 
 
 

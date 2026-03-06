@@ -80,3 +80,5 @@ Calculated based on the **combined monthly gross**:
 * **Saga, G.M.**
 * **Agbayani, E.Z.**
 * **Elviña, J.N.**
+
+Project Plan Link: https://docs.google.com/spreadsheets/d/14QEroycZBSs3QpdtPJ-ELushEXd8EPXep8-dBjpRDtk/edit?usp=sharing

@@ -4,6 +4,11 @@ import java.util.Scanner; // Used to capture user input from the console
 
 public class MO_IT101_Group14 { // Main class defined as requested
 
+    //CSV reader for different platforms, such as NetBeans
+    private static final String ATTENDANCE_CSV = "src/Employee Attendance Record.csv";
+    private static final String DATABASE_CSV   = "src/Employee Database.csv";
+    private static final String SSS_CSV        = "src/SSS Deduction.csv";
+
     // Constant for option 1
     public static final int OPTION_ONE = 1;
     // Constant for option 2

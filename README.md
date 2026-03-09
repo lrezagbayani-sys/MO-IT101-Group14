@@ -1,4 +1,4 @@
-# CP1 - MS2 Source Code - Basic Payroll Program (Group 14)
+# CP1 - MS2 Source Code - Basic Payroll Program (Group 14 - H1101)
 
 This program reads employee information and attendance records from CSV files, calculates total hours worked per payroll cutoff, applies government deductions, and displays a comprehensive salary summary.
 
@@ -74,7 +74,7 @@ Calculated based on the **combined monthly gross**:
 
 ---
 
-## 👥 Development Team (Group 14)
+## 👥 Development Team (Group 14 - H1101)
 * **Delos Santos, Q.L.**
 * **Palayaban, M.**
 * **Saga, G.M.**

@@ -112,7 +112,7 @@ public class MO_IT101_Group14 { // Main class defined as requested
             if (!employeeNumber.matches("\\d+")) {
 
                 // Print error message for character violation
-                System.out.println("\nAccess Denied: Invalid characters identified. Please select one numerical symbol from the given options.");
+                System.out.println("\nAccess Denied: Invalid characters identified. Please enter a valid employee number.");
 
                 // Print termination sequence
                 System.out.println("\nPROGRAM TERMINATED.");
@@ -244,8 +244,12 @@ public class MO_IT101_Group14 { // Main class defined as requested
             System.out.println("\nThank you for using the MotorPH Payroll System!");
             System.exit(0);
         } else if (!staffChoice.equals(String.valueOf(OPTION_ONE))) {
-            // Error handling for primary menu
-            System.out.println("\nAccess Denied: Invalid option identified. Please select one from the given options.");
+            // Error handling for primary menu distinguishing between string vs invalid number
+            if (staffChoice.isEmpty() || !staffChoice.matches("\\d+")) {
+                System.out.println("\nAccess Denied: Invalid characters identified. Please select one numerical symbol from the given options.");
+            } else {
+                System.out.println("\nAccess Denied: Invalid option identified. Please select one from the given options.");
+            }
             System.out.println("\nPROGRAM TERMINATED.");
             System.exit(0);
         }
@@ -273,8 +277,12 @@ public class MO_IT101_Group14 { // Main class defined as requested
             System.out.println("\nThank you for using the MotorPH Payroll System!");
             System.exit(0);
         } else {
-            // Error handling for sub-menu
-            System.out.println("\nAccess Denied: Invalid option identified. Please select one from the given options.");
+            // Error handling for sub-menu distinguishing between string vs invalid number
+            if (subChoice.isEmpty() || !subChoice.matches("\\d+")) {
+                System.out.println("\nAccess Denied: Invalid characters identified. Please select one numerical symbol from the given options.");
+            } else {
+                System.out.println("\nAccess Denied: Invalid option identified. Please select one from the given options.");
+            }
             System.out.println("\nPROGRAM TERMINATED.");
             System.exit(0);
         }
@@ -293,9 +301,9 @@ public class MO_IT101_Group14 { // Main class defined as requested
         // Perform existence check if a specific employee ID was provided
         if (isSingleEmployee) {
 
-            // Validate ID format
+            // Validate ID format (Strict check forcing the generic options message)
             if (!targetEmployee.matches("\\d+")) {
-                System.out.println("\nAccess Denied: Invalid characters identified. Please enter a valid employee number and try again.");
+                System.out.println("\nAccess Denied: Invalid characters identified. Please enter a valid employee number.");
                 System.out.println("\nPROGRAM TERMINATED.");
                 System.exit(0);
             }

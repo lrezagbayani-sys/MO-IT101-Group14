@@ -76,7 +76,7 @@ Calculated based on the **combined monthly gross**:
 
 ## 👥 Development Team (Group 14 - H1101)
 * **Delos Santos, Q.L.**: Finalized and tested the structure, logic, and compatibility of the codes using IntelliJ. Compiled the final program and CSV files on GitHub.
-* **Palayaban, M.**: Ensured the code is aligned with the rubrics and received further feedback from our mentor. Compiled and created the Login code and CSV files. 
+* **Palayaban, M.**: Ensured the code is aligned with the rubrics and further feedback from our mentor. Compiled and created the Login code and CSV files. 
 * **Saga, G.M.**: Gathered initial requirements and finalized the needed structure of the Payroll System. Tested the final code using Apache NetBeans and gave feedback.
 * **Agbayani, E.Z.**: Lead the Effort Estimation and Project Planning. Compiled and created the Hours Worked Calculation, Gross and Net Computation, and Deduction Application codes.
 * **Elviña, J.N.**: Gathered initial requirements and finalized the needed structure of the Payroll System. Tested the final code using Apache NetBeans and gave feedback.

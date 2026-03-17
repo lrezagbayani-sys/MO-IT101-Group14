@@ -4,7 +4,7 @@ import java.util.Scanner; // Used to capture user input from the console
 
 public class MO_IT101_Group14 { // Main class defined as requested
 
-    // CSV path constants for NetBeans and cross-platform compatibility
+    // CSV path constants for NetBeans and cross-platform compatibility. The code was initially run using IntelliJ, but group testers use Apache NetBeans.
     private static final String ATTENDANCE_CSV = "src/Employee Attendance Record.csv";
 
     // Constant for the Employee Database path
@@ -26,7 +26,7 @@ public class MO_IT101_Group14 { // Main class defined as requested
     public static final int OPTION_MAX_MONTH = 8;
 
     // -------------------------------------------------------------------------
-    // MAIN ENTRY POINT
+    // MAIN ENTRY POINT (Login)
     // -------------------------------------------------------------------------
 
     public static void main(String[] args) {
@@ -81,7 +81,7 @@ public class MO_IT101_Group14 { // Main class defined as requested
 
 
     // -------------------------------------------------------------------------
-    // EMPLOYEE PORTAL METHOD
+    // EMPLOYEE PORTAL METHOD by Maribel
     // -------------------------------------------------------------------------
 
     public static void processEmployeePortal(Scanner scanner) {
@@ -222,7 +222,7 @@ public class MO_IT101_Group14 { // Main class defined as requested
 
 
     // -------------------------------------------------------------------------
-    // PAYROLL STAFF PORTAL METHOD
+    // PAYROLL STAFF PORTAL METHOD by Maribel
     // -------------------------------------------------------------------------
 
     public static void processStaffPortal(Scanner scanner) {
@@ -236,10 +236,10 @@ public class MO_IT101_Group14 { // Main class defined as requested
         // Prompt for choice
         System.out.print("Select option: ");
 
-        // Read choice and remove leading/trailing spaces
+        // Read choice and remove leading/trailing spaces to fix formatting
         String staffChoice = scanner.nextLine().trim();
 
-        // Exit branch
+        // Exit branch to let user know the code has run successfully or an invalid option was selected/identified. Same logic applies to other similar cases. 
         if (staffChoice.equals(String.valueOf(OPTION_TWO))) {
             System.out.println("\nThank you for using the MotorPH Payroll System!");
             System.exit(0);
@@ -290,7 +290,7 @@ public class MO_IT101_Group14 { // Main class defined as requested
 
 
     // -------------------------------------------------------------------------
-    // CORE PAYROLL DATA ENGINE
+    // CORE PAYROLL DATA ENGINE by Ethan (Hours Worked and Gross/Net Calc) and Quesha (Specific Month Selection)
     // -------------------------------------------------------------------------
 
     public static void processPayrollData(Scanner scanner, String targetEmployee, boolean isSingleEmployee) {
@@ -341,7 +341,7 @@ public class MO_IT101_Group14 { // Main class defined as requested
             }
         }
 
-        // Present month selection menu
+        // Present month selection menu (hopefully a unique feature made by the Group 14)
         System.out.println("Select the month to process payroll:");
         System.out.println("1. June");
         System.out.println("2. July");
@@ -478,7 +478,7 @@ public class MO_IT101_Group14 { // Main class defined as requested
                 double rawSecondCutoffHours = 0.0;
 
                 // -----------------------------------------------------------------
-                // OPTIONAL BORDER FOR "SHOW ALL MONTHS" OPTION
+                // OPTIONAL BORDER FOR "SHOW ALL MONTHS" OPTION by Quesha
                 // -----------------------------------------------------------------
                 if (isSingleEmployee && monthChoice == 8) {
                     String monthBanner = "";
@@ -622,7 +622,7 @@ public class MO_IT101_Group14 { // Main class defined as requested
                 System.out.printf("3. Gross Salary: PHP %.14f\n", secondGross);
                 System.out.println("4. Each Deduction:");
 
-                // Print specific deduction items
+                // Print specific deduction items, as per Sir AJ's synch instructions
                 System.out.printf("- SSS: PHP %.14f\n", sss);
                 System.out.printf("- PhilHealth: PHP %.14f\n", ph);
                 System.out.printf("- Pag-IBIG: PHP %.14f\n", pi);
@@ -638,7 +638,7 @@ public class MO_IT101_Group14 { // Main class defined as requested
         // Final visual border
         System.out.println("\n—-------------------------------------------------------");
 
-        // Process complete message - Formatting updated to match user request
+        // Process complete message - Formatting is updated to match user request
         System.out.println("");
         System.out.println("PAYROLL PROCESSED SUCCESSFULLY.");
         System.out.println("");
@@ -649,4 +649,4 @@ public class MO_IT101_Group14 { // Main class defined as requested
 
     } // End of processPayrollData Method
 
-} // End of MO_IT101_Group14 Class
+} // End of MO_IT101_Group14 Class. Approved by Ginki and John. Thanks!

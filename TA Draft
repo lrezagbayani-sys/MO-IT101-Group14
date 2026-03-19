@@ -504,9 +504,9 @@ public class MO_IT101_Group14
                     }
                 }
 
-                // Round hours to 2 decimal places to ensure calculation matches printed values exactly
-                double firstCutoffHours = Math.round(rawFirstCutoffHours * 100.0) / 100.0;
-                double secondCutoffHours = Math.round(rawSecondCutoffHours * 100.0) / 100.0;
+                // Changed logic to ensure 4 decimal places without rounding off
+                double firstCutoffHours = (long)(rawFirstCutoffHours * 10000.0) / 10000.0;
+                double secondCutoffHours = (long)(rawSecondCutoffHours * 10000.0) / 10000.0;
 
                 double firstGross = firstCutoffHours * empRates[empIndex];
                 double secondGross = secondCutoffHours * empRates[empIndex];
@@ -541,12 +541,12 @@ public class MO_IT101_Group14
 
                 // --- Final Screen Display ---
                 System.out.println("1. Cutoff Date: " + monthNameStr + " 1 to 15");
-                System.out.printf("2. Total Hours Worked: %.2f\n", firstCutoffHours);
+                System.out.printf("2. Total Hours Worked: %.4f\n", firstCutoffHours);
                 System.out.printf("3. Gross Salary: PHP %.4f\n", firstGross);
                 System.out.printf("4. Net Salary: PHP %.4f\n\n", firstGross);
 
                 System.out.println("1. Cutoff Date: " + monthNameStr + " 16 to End");
-                System.out.printf("2. Total Hours Worked: %.2f\n", secondCutoffHours);
+                System.out.printf("2. Total Hours Worked: %.4f\n", secondCutoffHours);
                 System.out.printf("3. Gross Salary: PHP %.4f\n", secondGross);
                 System.out.println("4. Each Deduction:");
                 System.out.printf("- SSS: PHP %.4f\n", sss);

@@ -56,8 +56,8 @@ The program uses **Regex Validation** (`!employeeNumber.matches("\\d+")`) to cat
 * **Shift End:** Logouts are capped at **5:00 PM (17:00)**.
 * **Lunch Break:** The system automatically subtracts **1 hour** for the mandatory break.
 * **Cutoff Split:**
-* * **Days 1-15:** First Cutoff
-* * **Days 16-31:** Second Cutoff
+*  **Days 1-15:** First Cutoff
+*  **Days 16-30/31:** Second Cutoff
 
 ### **Deduction Engine**
 Calculated based on the **combined monthly gross**:

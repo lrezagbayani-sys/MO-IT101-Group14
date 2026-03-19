@@ -1,0 +1,6 @@
+*.class
+/nbproject/
+/build/
+/out/
+.idea/
+*.jar

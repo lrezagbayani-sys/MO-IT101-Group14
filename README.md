@@ -12,7 +12,7 @@ To ensure the program finds the database files correctly, follow these steps:
    git clone https://github.com/Irezagbayani-sys/MO-IT101-Group14.git
    ```
 2. **Open in IDE:** Open the root folder in **NetBeans, IntelliJ, or VS Code**.
-3. **CSV Location:** Ensure `Employee Database.csv` and `Employee Attendance Record.csv` remain inside the `src/` folder.
+3. **CSV Location:** Ensure `Employee Database.csv` and `Employee Attendance Record.csv` remain inside the root folder (not the src).
 4. **Compile & Run:** Execute `MO_IT101_Group14.java`.
 
 ---

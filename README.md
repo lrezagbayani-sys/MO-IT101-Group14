@@ -1,4 +1,4 @@
-# CP1 - MS2 Source Code - Basic Payroll Program (Group 14 - H1101)
+# CP1 - TA Source Code - Basic Payroll Program (Group 14 - H1101)
 
 This program reads employee information and attendance records from CSV files, calculates total hours worked per payroll cutoff, applies government deductions, and displays a comprehensive salary summary.
 

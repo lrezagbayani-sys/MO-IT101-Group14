@@ -27,7 +27,7 @@ public class MO_IT101_Group14
     {
         Scanner inputScanner = new Scanner(System.in);
 
-        System.out.print("— MotorPH Payroll System —\n\n");
+        System.out.print("--- MotorPH Payroll System ---\n\n");
 
         System.out.print("Please Enter Login Credentials to Continue\n");
 
@@ -42,12 +42,12 @@ public class MO_IT101_Group14
         {
             if (usernameInput.equals("employee"))
             {
-                System.out.println("\nLOGIN SUCCESSFUL! \n\n— Welcome, MotorPH Employee! —");
+                System.out.println("\nLOGIN SUCCESSFUL! \n\n--- Welcome, MotorPH Employee! ---");
                 processEmployeePortal(inputScanner);
             }
             else
             {
-                System.out.println("\nLOGIN SUCCESSFUL! \n\n— Welcome, MotorPH Payroll Staff! —");
+                System.out.println("\nLOGIN SUCCESSFUL! \n\n--- Welcome, MotorPH Payroll Staff! ---");
                 processStaffPortal(inputScanner);
             }
         }
@@ -214,11 +214,11 @@ public class MO_IT101_Group14
             }
             catch (Exception e) {}
 
-            System.out.println("\n— MOTORPH EMPLOYEE DETAILS —\n");
+            System.out.println("\n--- MOTORPH EMPLOYEE DETAILS ---\n");
             System.out.println("Employee #: " + employeeNumber);
             System.out.println("Name: " + employeeName);
             System.out.println("Birthday: " + employeeBirthday);
-            System.out.println("\n—-------------------------------------------------------");
+            System.out.println("\n-------------------------------------------------------");
             System.out.println("\nThank you for using the MotorPH Payroll System!");
         }
         else if (optionChoice.equals(String.valueOf(OPTION_TWO)))
@@ -459,11 +459,11 @@ public class MO_IT101_Group14
                     case 11: headerMonthStr = "NOVEMBER"; headerLastDay = "30"; break;
                     case 12: headerMonthStr = "DECEMBER"; headerLastDay = "31"; headerSuffix = "ST"; break;
                 }
-                System.out.println("\n— PAYROLL OF MOTORPH EMPLOYEE #" + currentEmpId + " FOR " + headerMonthStr + " 1ST TO " + headerLastDay + headerSuffix + " —");
+                System.out.println("\n--- PAYROLL OF MOTORPH EMPLOYEE #" + currentEmpId + " FOR " + headerMonthStr + " 1ST TO " + headerLastDay + headerSuffix + " ---");
             }
             else if (monthChoice == 8)
             {
-                System.out.println("\n— PAYROLL OF MOTORPH EMPLOYEE #" + currentEmpId + " FOR JUNE TO DECEMBER —");
+                System.out.println("\n--- PAYROLL OF MOTORPH EMPLOYEE #" + currentEmpId + " FOR JUNE TO DECEMBER ---");
             }
 
             // Printed exactly once per employee as requested to prevent repetition
@@ -490,7 +490,7 @@ public class MO_IT101_Group14
                         case 11: monthBanner = "NOVEMBER"; break;
                         case 12: monthBanner = "DECEMBER"; break;
                     }
-                    System.out.println("\n— " + monthBanner + " PAYROLL —");
+                    System.out.println("\n--- " + monthBanner + " PAYROLL ---");
                 }
 
                 // Retrieve memory-loaded attendance data
@@ -563,7 +563,7 @@ public class MO_IT101_Group14
             }
         }
 
-        System.out.println("\n—-------------------------------------------------------");
+        System.out.println("\n-------------------------------------------------------");
         System.out.println("\nPayroll Processed Successfully.\n\nThank you for using the MotorPH Payroll System!");
         System.exit(0);
     }

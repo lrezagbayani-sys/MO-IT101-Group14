@@ -63,7 +63,7 @@ The program uses **Regex Validation** (`!employeeNumber.matches("\\d+")`) to cat
 Calculated based on the **combined monthly gross**:
 * **SSS:** 4.5% of gross.
 * **PhilHealth:** 3.0% (total divided by 2).
-* **Pag-IBIG:** Fixed PHP 100.00.
+* **Pag-IBIG:** If greater than PHP 100 = PHP 100.00 deduction.
 * **Withholding Tax:** Nested branching logic applying **20%, 25%, or 30%** based on taxable income brackets.
 
 ---

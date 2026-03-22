@@ -140,7 +140,7 @@ public class MO_IT101_Group14
 
     public static double computePagIbig(double gross)
     {
-        return 100.0; // Fixed contribution rate
+        return Math.min(gross * 0.02, 100.0); //Dynamic Calculations
     }
 
     // --- Tax Brackets ---

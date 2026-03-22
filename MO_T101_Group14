@@ -7,7 +7,6 @@ public class MO_IT101_Group14
     // CSV path constants for NetBeans and cross-platform compatibility.
     private static final String ATTENDANCE_CSV = "Employee Attendance Record.csv";
     private static final String DATABASE_CSV = "Employee Database.csv";
-    private static final String SSS_CSV = "SSS Deduction.csv";
 
     // System navigation constants
     public static final int OPTION_ONE = 1;

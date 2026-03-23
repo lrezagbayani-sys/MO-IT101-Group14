@@ -312,25 +312,8 @@ public class MO_IT101_Group14
     // CORE PAYROLL DATA ENGINE by Ethan & Quesha
     // -------------------------------------------------------------------------
 
-    public static void processPayrollData(Scanner scanner, String targetEmployee, boolean isSingleEmployee)
-    {
-        if (isSingleEmployee)
-        {
-            if (!targetEmployee.matches("\\d+"))
-            {
-                System.out.println("\nAccess Denied: Invalid characters identified. Please enter a valid employee number.");
-                System.out.println("\nPROGRAM TERMINATED.");
-                System.exit(0);
-            }
-
-            if (!validateEmployee(targetEmployee))
-            {
-                System.out.println("\nAccess Denied: Employee number unidentified. Please check the number again.");
-                System.out.println("\nPROGRAM TERMINATED.");
-                System.exit(0);
-            }
-        }
-
+//Prints the promopt for the months choice
+    public static int promptMonthChoice(Scanner scanner, boolean isSingleEmployee) {
         System.out.println("Select the month to process payroll:");
         System.out.println("1. June");
         System.out.println("2. July");
@@ -339,229 +322,256 @@ public class MO_IT101_Group14
         System.out.println("5. October");
         System.out.println("6. November");
         System.out.println("7. December");
-
-        if (isSingleEmployee)
-        {
-            System.out.println("8. Show All Months");
-        }
-
+        if (isSingleEmployee) System.out.println("8. Show All Months");
         System.out.print("Select option: ");
-        String monthChoiceStr = scanner.nextLine().trim();
-        int monthChoice = 0;
-
-        try
-        {
-            monthChoice = Integer.parseInt(monthChoiceStr);
-        }
-        catch (NumberFormatException exception)
-        {
+        
+        //Returns error handle if the input is an invalid character or number
+        String raw = scanner.nextLine().trim();
+        int choice = 0;
+        try {
+            choice = Integer.parseInt(raw);
+        } catch (NumberFormatException e) {
             System.out.println("\nAccess Denied: Invalid characters identified. Please select one numerical symbol from the given options.");
             System.out.println("\nPROGRAM TERMINATED.");
             System.exit(0);
         }
-
-        if (monthChoice < 1 || (isSingleEmployee && monthChoice > 8) || (!isSingleEmployee && monthChoice > 7))
-        {
+        if (choice < 1 || (isSingleEmployee && choice > 8) || (!isSingleEmployee && choice > 7)) {
             System.out.println("\nAccess Denied: Invalid option identified. Please select one from the given options.");
             System.out.println("\nPROGRAM TERMINATED.");
             System.exit(0);
         }
+        return choice;
+    }
 
-        // --- Memory Loading: Employees ---
+    //Returns the appropriate month for inputs from prompmtMonthChoice
+    public static String getMonthName(int month) {
+        switch (month) {
+            case 6:
+                return "June";
+            case 7:
+                return "July";
+            case 8:
+                return "August";
+            case 9:
+                return "September";
+            case 10:
+                return "October";
+            case 11:
+                return "November";
+            case 12:
+                return "December";
+            default:
+                return "";
+        }
+    }
+
+    //Reusable capitilizing method for the Months
+    public static String getMonthNameUpper(int month) {
+        return getMonthName(month).toUpperCase();
+    }
+
+    //Identifies all months to have 31 days, except June, September and November
+    public static String getLastDay(int month) {
+        switch (month) {
+            case 6:
+            case 9:
+            case 11:
+                return "30";
+            default:
+                return "31";
+        }
+    }
+
+    //Identifies all months last day to end with (30th), other than July, August, October and December
+    public static String getLastDaySuffix(int month) {
+        switch (month) {
+            case 7:
+            case 8:
+            case 10:
+            case 12:
+                return "ST";
+            default:
+                return "TH";
+        }
+    }
+
+    //Loads and read the Employee Attendance Record CSV, then assign variables for the array
+    public static int loadEmployeeDatabase(String targetEmployee, boolean isSingleEmployee,
+                                           String[] empIds, String[] empNames, String[] empBirthdays, double[] empRates) {
+        int count = 0;
+        try (BufferedReader reader = openCSV(DATABASE_CSV)) {
+            if (reader != null) {
+                reader.readLine();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.trim().isEmpty()) continue;
+                    String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                    String id = data[0].trim();
+                    if (!isSingleEmployee || id.equals(targetEmployee)) {
+                        empIds[count] = id;
+                        empNames[count] = data[2].replace("\"", "").trim() + " " + data[1].replace("\"", "").trim();
+                        empBirthdays[count] = data[3].trim();
+                        String rateStr = data[data.length - 1].replace("\"", "").replace(",", "").trim();
+                        empRates[count] = Double.parseDouble(rateStr);
+                        count++;
+                    }
+                }
+            }
+        } catch (Exception e) {
+        }
+        return count;
+    }
+
+    //Loads and read the Employee Attendance Record CSV, then assign variables for the array
+    public static int loadAttendanceRecords(String[] attIds, int[] attMonths, int[] attDays, double[] attHours) {
+        int count = 0;
+        try (BufferedReader reader = openCSV(ATTENDANCE_CSV)) {
+            if (reader != null) {
+                reader.readLine();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.trim().isEmpty()) continue;
+                    String[] data = line.split(",");
+                    String[] dateParts = data[3].trim().split("/");
+                    attIds[count] = data[0].trim();
+                    attMonths[count] = Integer.parseInt(dateParts[0]);
+                    attDays[count] = Integer.parseInt(dateParts[1]);
+                    attHours[count] = computeDailyHours(data[4], data[5]);
+                    count++;
+                }
+            }
+        } catch (Exception e) {
+        }
+        return count;
+    }
+
+    //Prints the employee's header and adding the variables from the previous loaders
+    public static void printPayrollHeader(String empId, String empName, String empBirthday,
+                                          int monthChoice) {
+        if (monthChoice >= 1 && monthChoice <= 7) {
+            int m = monthChoice + 5;
+            System.out.println("\n--- PAYROLL OF MOTORPH EMPLOYEE #" + empId
+                    + " FOR " + getMonthNameUpper(m)
+                    + " 1ST TO " + getLastDay(m) + getLastDaySuffix(m) + " ---");
+        } else {
+            System.out.println("\n--- PAYROLL OF MOTORPH EMPLOYEE #" + empId
+                    + " FOR JUNE TO DECEMBER ---");
+        }
+        System.out.println("\nEmployee #: " + empId);
+        System.out.println("Name: " + empName);
+        System.out.println("Birthday: " + empBirthday);
+    }
+
+    //Computes the first and last cutoffs of each month (First 1-15, Second = <=16)
+    public static double[] computeCutoffHours(String empId, int month,
+                                              String[] attIds, int[] attMonths, int[] attDays, double[] attHours, int attendanceCount) {
+        double raw1 = 0.0, raw2 = 0.0;
+        for (int i = 0; i < attendanceCount; i++) {
+            if (attIds[i].equals(empId) && attMonths[i] == month) {
+                if (attDays[i] <= 15) raw1 += attHours[i];
+                else raw2 += attHours[i];
+            }
+        }
+        double h1 = (long) (raw1 * 1_000_000_000_000.0) / 1_000_000_000_000.0;
+        double h2 = (long) (raw2 * 1_000_000_000_000.0) / 1_000_000_000_000.0;
+        return new double[]{h1, h2};
+    }
+
+    //Displays the employee monthly payroll, seperating cut-offs and calculating overall deduction
+    public static void printMonthlyPayroll(String empId, int actualMonth, double hourlyRate,
+                                           String[] attIds, int[] attMonths, int[] attDays, double[] attHours, int attendanceCount,
+                                           boolean isSingleEmployee, int monthChoice) {
+        if (isSingleEmployee && monthChoice == 8) {
+            System.out.println("\n--- " + getMonthNameUpper(actualMonth) + " PAYROLL ---");
+        }
+
+        double[] cutoffs = computeCutoffHours(empId, actualMonth,
+                attIds, attMonths, attDays, attHours, attendanceCount);
+        double firstCutoffHours = cutoffs[0];
+        double secondCutoffHours = cutoffs[1];
+
+        double firstGross = firstCutoffHours * hourlyRate;
+        double secondGross = secondCutoffHours * hourlyRate;
+        double combinedGross = firstGross + secondGross;
+
+        double sss = 0, ph = 0, pi = 0, tax = 0;
+        if (combinedGross > 0) {
+            sss = computeSSS(combinedGross);
+            ph = computePhilHealth(combinedGross);
+            pi = computePagIbig(combinedGross);
+            tax = calculateTax(combinedGross - (sss + ph + pi));
+        }
+
+        double totalDeductions = sss + ph + pi + tax;
+        double netCutoff2 = secondGross - totalDeductions;
+        String monthName = getMonthName(actualMonth);
+
+        System.out.println("\n1. Cutoff Date: " + monthName + " 1 to 15");
+        System.out.printf("2. Total Hours Worked: %.12f\n", firstCutoffHours);
+        System.out.printf("3. Gross Salary: PHP %.12f\n", firstGross);
+        System.out.printf("4. Net Salary: PHP %.12f\n\n", firstGross);
+
+        System.out.println("1. Cutoff Date: " + monthName + " 16 to End");
+        System.out.printf("2. Total Hours Worked: %.12f\n", secondCutoffHours);
+        System.out.printf("3. Gross Salary: PHP %.12f\n", secondGross);
+        System.out.println("4. Each Deduction:");
+        System.out.printf("- SSS: PHP %.12f\n", sss);
+        System.out.printf("- PhilHealth: PHP %.12f\n", ph);
+        System.out.printf("- Pag-IBIG: PHP %.12f\n", pi);
+        System.out.printf("- Withholding Tax: PHP %.12f\n", tax);
+        System.out.printf("5. Total Deductions: PHP %.12f\n", totalDeductions);
+        System.out.printf("6. Net Salary: PHP %.12f\n", netCutoff2);
+    }
+
+    //Error handling, employee database displaying and processing end
+    public static void processPayrollData(Scanner scanner, String targetEmployee, boolean isSingleEmployee) {
+        if (isSingleEmployee) { //Error handling for the employee database input
+            if (!targetEmployee.matches("\\d+")) {
+                System.out.println("\nAccess Denied: Invalid characters identified. Please enter a valid employee number.");
+                System.out.println("\nPROGRAM TERMINATED.");
+                System.exit(0);
+            }
+            if (!validateEmployee(targetEmployee)) {
+                System.out.println("\nAccess Denied: Employee number unidentified. Please check the number again.");
+                System.out.println("\nPROGRAM TERMINATED.");
+                System.exit(0);
+            }
+        }
+
+        int monthChoice = promptMonthChoice(scanner, isSingleEmployee);
+
+        //Applies Employee Database capacity to only 100, then counts the number of employee data
         String[] empIds = new String[MAX_EMPLOYEE_LIMIT];
         String[] empNames = new String[MAX_EMPLOYEE_LIMIT];
         String[] empBirthdays = new String[MAX_EMPLOYEE_LIMIT];
         double[] empRates = new double[MAX_EMPLOYEE_LIMIT];
-        int employeeCount = 0;
+        int employeeCount = loadEmployeeDatabase(targetEmployee, isSingleEmployee,
+                empIds, empNames, empBirthdays, empRates);
 
-        try (BufferedReader reader = openCSV(DATABASE_CSV))
-        {
-            if (reader != null)
-            {
-                reader.readLine();
-                String currentLine;
-                while ((currentLine = reader.readLine()) != null)
-                {
-                    if (currentLine.trim().isEmpty()) continue;
-                    String[] data = currentLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-                    String id = data[0].trim();
-
-                    if (!isSingleEmployee || id.equals(targetEmployee))
-                    {
-                        empIds[employeeCount] = id;
-                        empNames[employeeCount] = data[2].replace("\"", "").trim() + " " + data[1].replace("\"", "").trim();
-                        empBirthdays[employeeCount] = data[3].trim();
-                        String rateString = data[data.length - 1].replace("\"", "").replace(",", "").trim();
-                        empRates[employeeCount] = Double.parseDouble(rateString);
-                        employeeCount++;
-                    }
-                }
-            }
-        }
-        catch (Exception e) {}
-
-        // --- Memory Loading: Attendance (Prevents slow file I/O bottleneck) ---
+        //Applies Employee Attendance capacity to only 100, then counts the number of attendance data
         String[] attIds = new String[MAX_ATTENDANCE_RECORDS];
         int[] attMonths = new int[MAX_ATTENDANCE_RECORDS];
         int[] attDays = new int[MAX_ATTENDANCE_RECORDS];
         double[] attHours = new double[MAX_ATTENDANCE_RECORDS];
-        int attendanceCount = 0;
+        int attendanceCount = loadAttendanceRecords(attIds, attMonths, attDays, attHours);
+        
+        //Converts the Month Choice input to the appropriate month
+        int startMonth = (monthChoice == 8) ? 6 : (monthChoice + 5);
+        int endMonth = (monthChoice == 8) ? 12 : (monthChoice + 5);
 
-        try (BufferedReader reader = openCSV(ATTENDANCE_CSV))
-        {
-            if (reader != null)
-            {
-                reader.readLine();
-                String currentLine;
-                while ((currentLine = reader.readLine()) != null)
-                {
-                    if (currentLine.trim().isEmpty()) continue;
-                    String[] data = currentLine.split(",");
+        //Process data for selecting option for all employees
+        for (int empIndex = 0; empIndex < employeeCount; empIndex++) {
+            printPayrollHeader(empIds[empIndex], empNames[empIndex],
+                    empBirthdays[empIndex], monthChoice);
 
-                    String targetId = data[0].trim();
-                    String[] dateParts = data[3].trim().split("/");
-                    int recordMonth = Integer.parseInt(dateParts[0]);
-
-                    // Store only relevant data to save memory
-                    attIds[attendanceCount] = targetId;
-                    attMonths[attendanceCount] = recordMonth;
-                    attDays[attendanceCount] = Integer.parseInt(dateParts[1]);
-                    attHours[attendanceCount] = computeDailyHours(data[4], data[5]);
-                    attendanceCount++;
-                }
-            }
-        }
-        catch (Exception e) {}
-
-        // --- Payroll Execution ---
-        int startMonthLoop = (monthChoice == 8) ? 6 : (monthChoice + 5);
-        int endMonthLoop = (monthChoice == 8) ? 12 : (monthChoice + 5);
-
-        for (int empIndex = 0; empIndex < employeeCount; empIndex++)
-        {
-            String currentEmpId = empIds[empIndex];
-
-            // Master Header Display Output
-            if (monthChoice >= 1 && monthChoice <= 7)
-            {
-                int m = monthChoice + 5;
-                String headerMonthStr = "";
-                String headerLastDay = "";
-                String headerSuffix = "TH";
-                switch (m)
-                {
-                    case 6: headerMonthStr = "JUNE"; headerLastDay = "30"; break;
-                    case 7: headerMonthStr = "JULY"; headerLastDay = "31"; headerSuffix = "ST"; break;
-                    case 8: headerMonthStr = "AUGUST"; headerLastDay = "31"; headerSuffix = "ST"; break;
-                    case 9: headerMonthStr = "SEPTEMBER"; headerLastDay = "30"; break;
-                    case 10: headerMonthStr = "OCTOBER"; headerLastDay = "31"; headerSuffix = "ST"; break;
-                    case 11: headerMonthStr = "NOVEMBER"; headerLastDay = "30"; break;
-                    case 12: headerMonthStr = "DECEMBER"; headerLastDay = "31"; headerSuffix = "ST"; break;
-                }
-                System.out.println("\n--- PAYROLL OF MOTORPH EMPLOYEE #" + currentEmpId + " FOR " + headerMonthStr + " 1ST TO " + headerLastDay + headerSuffix + " ---");
-            }
-            else if (monthChoice == 8)
-            {
-                System.out.println("\n--- PAYROLL OF MOTORPH EMPLOYEE #" + currentEmpId + " FOR JUNE TO DECEMBER ---");
-            }
-
-            // Printed exactly once per employee as requested to prevent repetition
-            System.out.println("\nEmployee #: " + currentEmpId);
-            System.out.println("Name: " + empNames[empIndex]);
-            System.out.println("Birthday: " + empBirthdays[empIndex]);
-
-            for (int actualMonth = startMonthLoop; actualMonth <= endMonthLoop; actualMonth++)
-            {
-                double rawFirstCutoffHours = 0.0;
-                double rawSecondCutoffHours = 0.0;
-
-                // Month Banner specifically for the 'Show All' option
-                if (isSingleEmployee && monthChoice == 8)
-                {
-                    String monthBanner = "";
-                    switch (actualMonth)
-                    {
-                        case 6: monthBanner = "JUNE"; break;
-                        case 7: monthBanner = "JULY"; break;
-                        case 8: monthBanner = "AUGUST"; break;
-                        case 9: monthBanner = "SEPTEMBER"; break;
-                        case 10: monthBanner = "OCTOBER"; break;
-                        case 11: monthBanner = "NOVEMBER"; break;
-                        case 12: monthBanner = "DECEMBER"; break;
-                    }
-                    System.out.println("\n--- " + monthBanner + " PAYROLL ---");
-                }
-
-                // Retrieve memory-loaded attendance data
-                for (int i = 0; i < attendanceCount; i++)
-                {
-                    if (attIds[i].equals(currentEmpId) && attMonths[i] == actualMonth)
-                    {
-                        if (attDays[i] <= 15)
-                        {
-                            rawFirstCutoffHours += attHours[i];
-                        }
-                        else
-                        {
-                            rawSecondCutoffHours += attHours[i];
-                        }
-                    }
-                }
-
-                // Changed logic to ensure 12 decimal places without rounding off
-                double firstCutoffHours = (long)(rawFirstCutoffHours * 1000000000000.0) / 1000000000000.0;
-                double secondCutoffHours = (long)(rawSecondCutoffHours * 1000000000000.0) / 1000000000000.0;
-
-                double firstGross = firstCutoffHours * empRates[empIndex];
-                double secondGross = secondCutoffHours * empRates[empIndex];
-                double combinedGross = firstGross + secondGross;
-
-                double sss = 0, ph = 0, pi = 0, tax = 0;
-
-                if (combinedGross > 0)
-                {
-                    sss = computeSSS(combinedGross);
-                    ph = computePhilHealth(combinedGross);
-                    pi = computePagIbig(combinedGross);
-
-                    double taxable = combinedGross - (sss + ph + pi);
-                    tax = calculateTax(taxable);
-                }
-
-                double totalDeductions = sss + ph + pi + tax;
-                double netCutoff2 = secondGross - totalDeductions;
-
-                String monthNameStr = "";
-                switch (actualMonth)
-                {
-                    case 6: monthNameStr = "June"; break;
-                    case 7: monthNameStr = "July"; break;
-                    case 8: monthNameStr = "August"; break;
-                    case 9: monthNameStr = "September"; break;
-                    case 10: monthNameStr = "October"; break;
-                    case 11: monthNameStr = "November"; break;
-                    case 12: monthNameStr = "December"; break;
-                }
-
-                // --- Final Screen Display ---
-                System.out.println("\n1. Cutoff Date: " + monthNameStr + " 1 to 15");
-                System.out.printf("2. Total Hours Worked: %.12f\n", firstCutoffHours);
-                System.out.printf("3. Gross Salary: PHP %.12f\n", firstGross);
-                System.out.printf("4. Net Salary: PHP %.12f\n\n", firstGross);
-
-                System.out.println("1. Cutoff Date: " + monthNameStr + " 16 to End");
-                System.out.printf("2. Total Hours Worked: %.12f\n", secondCutoffHours);
-                System.out.printf("3. Gross Salary: PHP %.12f\n", secondGross);
-                System.out.println("4. Each Deduction:");
-                System.out.printf("- SSS: PHP %.12f\n", sss);
-                System.out.printf("- PhilHealth: PHP %.12f\n", ph);
-                System.out.printf("- Pag-IBIG: PHP %.12f\n", pi);
-                System.out.printf("- Withholding Tax: PHP %.12f\n", tax);
-                System.out.printf("5. Total Deductions: PHP %.12f\n", totalDeductions);
-                System.out.printf("6. Net Salary: PHP %.12f\n", netCutoff2);
+            for (int actualMonth = startMonth; actualMonth <= endMonth; actualMonth++) {
+                printMonthlyPayroll(empIds[empIndex], actualMonth, empRates[empIndex],
+                        attIds, attMonths, attDays, attHours, attendanceCount,
+                        isSingleEmployee, monthChoice);
             }
         }
 
+        //System confirmation of the payroll has successfully processed
         System.out.println("\n-------------------------------------------------------");
         System.out.println("\nPayroll Processed Successfully.\n\nThank you for using the MotorPH Payroll System!");
         System.exit(0);

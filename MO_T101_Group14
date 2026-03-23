@@ -89,10 +89,11 @@ public class MO_IT101_Group14
     // Validates employee existence to prevent downstream calculation errors
     public static boolean validateEmployee(String empId)
     {
-        try (BufferedReader reader = openCSV(DATABASE_CSV))
-        {
-            if (reader == null) return false;
+        BufferedReader reader = openCSV(DATABASE_CSV);
+        if (reader == null) return false;
 
+        try
+        {
             reader.readLine(); // Skip header
             String currentLine;
             while ((currentLine = reader.readLine()) != null)
@@ -100,9 +101,11 @@ public class MO_IT101_Group14
                 String[] data = currentLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
                 if (data[0].trim().equals(empId))
                 {
+                    reader.close();
                     return true;
                 }
             }
+            reader.close();
         }
         catch (Exception e) {}
         return false;
@@ -196,22 +199,27 @@ public class MO_IT101_Group14
             String employeeName = "";
             String employeeBirthday = "";
 
-            try (BufferedReader reader = openCSV(DATABASE_CSV))
+            BufferedReader reader = openCSV(DATABASE_CSV);
+            if (reader != null)
             {
-                reader.readLine();
-                String currentLine;
-                while ((currentLine = reader.readLine()) != null)
+                try
                 {
-                    String[] employeeData = currentLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-                    if (employeeData[0].trim().equals(employeeNumber))
+                    reader.readLine();
+                    String currentLine;
+                    while ((currentLine = reader.readLine()) != null)
                     {
-                        employeeName = employeeData[2].replace("\"", "").trim() + " " + employeeData[1].replace("\"", "").trim();
-                        employeeBirthday = employeeData[3].trim();
-                        break;
+                        String[] employeeData = currentLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                        if (employeeData[0].trim().equals(employeeNumber))
+                        {
+                            employeeName = employeeData[2].replace("\"", "").trim() + " " + employeeData[1].replace("\"", "").trim();
+                            employeeBirthday = employeeData[3].trim();
+                            break;
+                        }
                     }
+                    reader.close();
                 }
+                catch (Exception e) {}
             }
-            catch (Exception e) {}
 
             System.out.println("\n--- MOTORPH EMPLOYEE DETAILS ---\n");
             System.out.println("Employee #: " + employeeNumber);
@@ -312,7 +320,7 @@ public class MO_IT101_Group14
     // CORE PAYROLL DATA ENGINE by Ethan & Quesha
     // -------------------------------------------------------------------------
 
-//Prints the promopt for the months choice
+    //Prints the promopt for the months choice
     public static int promptMonthChoice(Scanner scanner, boolean isSingleEmployee) {
         System.out.println("Select the month to process payroll:");
         System.out.println("1. June");
@@ -324,7 +332,7 @@ public class MO_IT101_Group14
         System.out.println("7. December");
         if (isSingleEmployee) System.out.println("8. Show All Months");
         System.out.print("Select option: ");
-        
+
         //Returns error handle if the input is an invalid character or number
         String raw = scanner.nextLine().trim();
         int choice = 0;
@@ -399,24 +407,26 @@ public class MO_IT101_Group14
     public static int loadEmployeeDatabase(String targetEmployee, boolean isSingleEmployee,
                                            String[] empIds, String[] empNames, String[] empBirthdays, double[] empRates) {
         int count = 0;
-        try (BufferedReader reader = openCSV(DATABASE_CSV)) {
-            if (reader != null) {
-                reader.readLine();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (line.trim().isEmpty()) continue;
-                    String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-                    String id = data[0].trim();
-                    if (!isSingleEmployee || id.equals(targetEmployee)) {
-                        empIds[count] = id;
-                        empNames[count] = data[2].replace("\"", "").trim() + " " + data[1].replace("\"", "").trim();
-                        empBirthdays[count] = data[3].trim();
-                        String rateStr = data[data.length - 1].replace("\"", "").replace(",", "").trim();
-                        empRates[count] = Double.parseDouble(rateStr);
-                        count++;
-                    }
+        BufferedReader reader = openCSV(DATABASE_CSV);
+        if (reader == null) return count;
+
+        try {
+            reader.readLine();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                String id = data[0].trim();
+                if (!isSingleEmployee || id.equals(targetEmployee)) {
+                    empIds[count] = id;
+                    empNames[count] = data[2].replace("\"", "").trim() + " " + data[1].replace("\"", "").trim();
+                    empBirthdays[count] = data[3].trim();
+                    String rateStr = data[data.length - 1].replace("\"", "").replace(",", "").trim();
+                    empRates[count] = Double.parseDouble(rateStr);
+                    count++;
                 }
             }
+            reader.close();
         } catch (Exception e) {
         }
         return count;
@@ -425,21 +435,23 @@ public class MO_IT101_Group14
     //Loads and read the Employee Attendance Record CSV, then assign variables for the array
     public static int loadAttendanceRecords(String[] attIds, int[] attMonths, int[] attDays, double[] attHours) {
         int count = 0;
-        try (BufferedReader reader = openCSV(ATTENDANCE_CSV)) {
-            if (reader != null) {
-                reader.readLine();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (line.trim().isEmpty()) continue;
-                    String[] data = line.split(",");
-                    String[] dateParts = data[3].trim().split("/");
-                    attIds[count] = data[0].trim();
-                    attMonths[count] = Integer.parseInt(dateParts[0]);
-                    attDays[count] = Integer.parseInt(dateParts[1]);
-                    attHours[count] = computeDailyHours(data[4], data[5]);
-                    count++;
-                }
+        BufferedReader reader = openCSV(ATTENDANCE_CSV);
+        if (reader == null) return count;
+
+        try {
+            reader.readLine();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] data = line.split(",");
+                String[] dateParts = data[3].trim().split("/");
+                attIds[count] = data[0].trim();
+                attMonths[count] = Integer.parseInt(dateParts[0]);
+                attDays[count] = Integer.parseInt(dateParts[1]);
+                attHours[count] = computeDailyHours(data[4], data[5]);
+                count++;
             }
+            reader.close();
         } catch (Exception e) {
         }
         return count;
@@ -554,7 +566,7 @@ public class MO_IT101_Group14
         int[] attDays = new int[MAX_ATTENDANCE_RECORDS];
         double[] attHours = new double[MAX_ATTENDANCE_RECORDS];
         int attendanceCount = loadAttendanceRecords(attIds, attMonths, attDays, attHours);
-        
+
         //Converts the Month Choice input to the appropriate month
         int startMonth = (monthChoice == 8) ? 6 : (monthChoice + 5);
         int endMonth = (monthChoice == 8) ? 12 : (monthChoice + 5);

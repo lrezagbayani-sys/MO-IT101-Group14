@@ -76,7 +76,7 @@ public class MO_IT101_Group14
             // Fallback: Strips "src/" if the IDE executes from the root directory
             try
             {
-                String rootPath = filePath.replace("src/", "");
+                String rootPath = filePath.replace("CSV Files/", "");
                 return new BufferedReader(new FileReader(rootPath));
             }
             catch (Exception ex)

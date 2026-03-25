@@ -65,25 +65,27 @@ public class MO_IT101_Group14
     // -------------------------------------------------------------------------
 
     // Centralized File Reader to resolve IDE discrepancies (NetBeans vs IntelliJ)
-    public static BufferedReader openCSV(String filePath)
-    {
-        try
-        {
-            return new BufferedReader(new FileReader(filePath));
-        }
-        catch (Exception e)
-        {
-            // Fallback: Strips "src/" if the IDE executes from the root directory
-            try
-            {
-                String rootPath = filePath.replace("CSV Files/", "");
-                return new BufferedReader(new FileReader(rootPath));
+public static BufferedReader openCSV(String filePath) throws FileNotFoundException {
+        // 1. Extract just the file name (e.g., "employee.csv") in case a weird path was passed
+        String fileName = new File(filePath).getName();
+
+        // 2. Build a list of all the places different IDEs might hide the file
+        File[] possibleLocations = {
+            new File(filePath),                        // Try the exact string passed first
+            new File(fileName),                        // Try the project root directory
+            new File("CSV Files/" + fileName),         // Try the NetBeans/Eclipse root style
+            new File("src/CSV Files/" + fileName)      // Try the IntelliJ src/ root style
+        };
+
+        // 3. Loop through the locations. The moment we find it, open it.
+        for (File file : possibleLocations) {
+            if (file.exists() && file.isFile()) {
+                return new BufferedReader(new FileReader(file));
             }
-            catch (Exception ex)
-            {
-                return null;
-            }
         }
+
+        // 4. Never return null. Throw a clear error so you know exactly why it failed.
+        throw new FileNotFoundException("CRITICAL ERROR: Could not locate '" + fileName + "' in any known directory.");
     }
 
     // Validates employee existence to prevent downstream calculation errors

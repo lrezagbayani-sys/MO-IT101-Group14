@@ -75,6 +75,7 @@ public class MO_IT101_Group14
             "src/" + fileName,                          // 2. Inside src folder (VS Code/Manual)
             "../" + fileName,                           // 3. One folder up (Terminal/Build folders)
             System.getProperty("user.dir") + "/" + fileName // 4. Absolute System Path
+            "MO_IT101_Group14/" + fileName                  // 5. For IntelliJ specific sub-folder setup
         };
 
         for (String path : potentialPaths) {

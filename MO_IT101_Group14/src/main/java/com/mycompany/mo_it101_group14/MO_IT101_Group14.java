@@ -1,7 +1,7 @@
 package com.mycompany.mo_it101_group14;
 
 import java.io.BufferedReader;
-import java.io.File; 
+import java.io.File;
 import java.io.FileReader;
 import java.util.Scanner;
 
@@ -69,13 +69,13 @@ public class MO_IT101_Group14
 
     // Enhanced File Reader to handle GitHub/IDE path discrepancies
     public static BufferedReader openCSV(String fileName) {
-        // List of potential locations where the CSV might be hidden depending on the IDE
+        // List of potential locations where the CSV might be hidden, depending on the IDE
         String[] potentialPaths = {
-            fileName,                                   // 1. Project Root (Standard)
-            "src/" + fileName,                          // 2. Inside src folder (VS Code/Manual)
-            "../" + fileName,                           // 3. One folder up (Terminal/Build folders)
-            System.getProperty("user.dir") + "/" + fileName // 4. Absolute System Path
-            "MO_IT101_Group14/" + fileName                  // 5. For IntelliJ specific sub-folder setup
+                fileName,                                       // 1. Project Root (Standard)
+                "src/" + fileName,                              // 2. Inside src folder (VS Code/Manual)
+                "../" + fileName,                               // 3. One folder up (Terminal/Build folders)
+                System.getProperty("user.dir") + "/" + fileName, // 4. Absolute System Path
+                "MO_IT101_Group14/" + fileName                  // 5. For IntelliJ-specific sub-folder setup
         };
 
         for (String path : potentialPaths) {

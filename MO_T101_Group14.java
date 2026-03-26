@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.File; // Added to support the new openCSV logic
 import java.io.FileReader;
 import java.util.Scanner;
 
@@ -64,46 +65,36 @@ public class MO_IT101_Group14
     // HELPER METHODS (Modularity & Reusability)
     // -------------------------------------------------------------------------
 
-    // Centralized File Reader to resolve IDE discrepancies (NetBeans vs IntelliJ)
+    // Enhanced File Reader to handle GitHub/IDE path discrepancies
+    public static BufferedReader openCSV(String fileName) {
+        // List of potential locations where the CSV might be hidden depending on the IDE
+        String[] potentialPaths = {
+            fileName,                                   // 1. Project Root (Standard)
+            "src/" + fileName,                          // 2. Inside src folder (VS Code/Manual)
+            "../" + fileName,                           // 3. One folder up (Terminal/Build folders)
+            System.getProperty("user.dir") + "/" + fileName // 4. Absolute System Path
+        };
 
-    public static BufferedReader openCSV(String filePath)
-
-    {
-
-        try
-
-        {
-
-            return new BufferedReader(new FileReader(filePath));
-
+        for (String path : potentialPaths) {
+            try {
+                File fileCheck = new File(path);
+                if (fileCheck.exists()) {
+                    return new BufferedReader(new FileReader(path));
+                }
+            } catch (Exception e) {
+                // Silently try the next path if this one fails
+            }
         }
 
-        catch (Exception e)
-
-        {
-
-            // Fallback: Strips "src/" if the IDE executes from the root directory
-
-            try
-
-            {
-
-                String rootPath = filePath.replace("src/", "");
-
-                return new BufferedReader(new FileReader(rootPath));
-
+        // Final attempt: using the ClassLoader (Useful for JARs or complex IDE setups)
+        try {
+            java.io.InputStream is = MO_IT101_Group14.class.getResourceAsStream("/" + fileName);
+            if (is != null) {
+                return new BufferedReader(new java.io.InputStreamReader(is));
             }
+        } catch (Exception e) { }
 
-            catch (Exception ex)
-
-            {
-
-                return null;
-
-            }
-
-        }
-
+        return null;
     }
 
     // Validates employee existence to prevent downstream calculation errors

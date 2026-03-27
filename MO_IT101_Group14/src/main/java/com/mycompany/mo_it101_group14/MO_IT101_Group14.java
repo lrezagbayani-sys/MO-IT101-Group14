@@ -72,7 +72,7 @@ public class MO_IT101_Group14
         // List of potential locations where the CSV might be hidden, depending on the IDE
         String[] potentialPaths = {
                 fileName,                                       // 1. Project Root (Standard)
-                "src/" + fileName,                              // 2. Inside src folder (VS Code/Manual)
+                "src/" + fileName,                              // 2. Inside the src folder (VS Code/Manual)
                 "../" + fileName,                               // 3. One folder up (Terminal/Build folders)
                 System.getProperty("user.dir") + "/" + fileName, // 4. Absolute System Path
                 "MO_IT101_Group14/" + fileName                  // 5. For IntelliJ-specific sub-folder setup
@@ -125,7 +125,7 @@ public class MO_IT101_Group14
         return false;
     }
 
-    // Applying 8AM-5PM window to comply with standard labor policies
+    // Applying 8 AM-5 PM window to comply with standard labor policies
     public static double computeDailyHours(String loginTime, String logoutTime)
     {
         String[] in = loginTime.trim().split(":");
@@ -334,38 +334,7 @@ public class MO_IT101_Group14
     // CORE PAYROLL DATA ENGINE by Ethan & Quesha
     // -------------------------------------------------------------------------
 
-    //Prints the promopt for the months choice
-    public static int promptMonthChoice(Scanner scanner, boolean isSingleEmployee) {
-        System.out.println("Select the month to process payroll:");
-        System.out.println("1. June");
-        System.out.println("2. July");
-        System.out.println("3. August");
-        System.out.println("4. September");
-        System.out.println("5. October");
-        System.out.println("6. November");
-        System.out.println("7. December");
-        if (isSingleEmployee) System.out.println("8. Show All Months");
-        System.out.print("Select option: ");
-
-        //Returns error handle if the input is an invalid character or number
-        String raw = scanner.nextLine().trim();
-        int choice = 0;
-        try {
-            choice = Integer.parseInt(raw);
-        } catch (NumberFormatException e) {
-            System.out.println("\nAccess Denied: Invalid characters identified. Please select one numerical symbol from the given options.");
-            System.out.println("\nPROGRAM TERMINATED.");
-            System.exit(0);
-        }
-        if (choice < 1 || (isSingleEmployee && choice > 8) || (!isSingleEmployee && choice > 7)) {
-            System.out.println("\nAccess Denied: Invalid option identified. Please select one from the given options.");
-            System.out.println("\nPROGRAM TERMINATED.");
-            System.exit(0);
-        }
-        return choice;
-    }
-
-    //Returns the appropriate month for inputs from prompmtMonthChoice
+    //Returns the appropriate month
     public static String getMonthName(int month) {
         switch (month) {
             case 6:
@@ -387,12 +356,12 @@ public class MO_IT101_Group14
         }
     }
 
-    //Reusable capitilizing method for the Months
+    //Reusable capitalizing method for the Months
     public static String getMonthNameUpper(int month) {
         return getMonthName(month).toUpperCase();
     }
 
-    //Identifies all months to have 31 days, except June, September and November
+    //Identifies all months to have 31 days, except June, September, and November
     public static String getLastDay(int month) {
         switch (month) {
             case 6:
@@ -417,7 +386,7 @@ public class MO_IT101_Group14
         }
     }
 
-    //Loads and read the Employee Attendance Record CSV, then assign variables for the array
+    //Loads and reads the Employee Attendance Record CSV, then assign variables for the array
     public static int loadEmployeeDatabase(String targetEmployee, boolean isSingleEmployee,
                                            String[] empIds, String[] empNames, String[] empBirthdays, double[] empRates) {
         int count = 0;
@@ -446,7 +415,7 @@ public class MO_IT101_Group14
         return count;
     }
 
-    //Loads and read the Employee Attendance Record CSV, then assign variables for the array
+    //Loads and reads the Employee Attendance Record CSV, then assigns variables for the array
     public static int loadAttendanceRecords(String[] attIds, int[] attMonths, int[] attDays, double[] attHours) {
         int count = 0;
         BufferedReader reader = openCSV(ATTENDANCE_CSV);
@@ -471,7 +440,7 @@ public class MO_IT101_Group14
         return count;
     }
 
-    //Prints the employee's header and adding the variables from the previous loaders
+    //Prints the employee's header and adds the variables from the previous loaders
     public static void printPayrollHeader(String empId, String empName, String empBirthday,
                                           int monthChoice) {
         if (monthChoice >= 1 && monthChoice <= 7) {
@@ -549,7 +518,7 @@ public class MO_IT101_Group14
         System.out.printf("6. Net Salary: PHP %.12f\n", netCutoff2);
     }
 
-    //Error handling, employee database displaying and processing end
+    //Error handling, employee database displaying, and processing end
     public static void processPayrollData(Scanner scanner, String targetEmployee, boolean isSingleEmployee) {
         if (isSingleEmployee) { //Error handling for the employee database input
             if (!targetEmployee.matches("\\d+")) {
@@ -563,8 +532,6 @@ public class MO_IT101_Group14
                 System.exit(0);
             }
         }
-
-        int monthChoice = promptMonthChoice(scanner, isSingleEmployee);
 
         //Applies Employee Database capacity to only 100, then counts the number of employee data
         String[] empIds = new String[MAX_EMPLOYEE_LIMIT];
@@ -581,11 +548,12 @@ public class MO_IT101_Group14
         double[] attHours = new double[MAX_ATTENDANCE_RECORDS];
         int attendanceCount = loadAttendanceRecords(attIds, attMonths, attDays, attHours);
 
-        //Converts the Month Choice input to the appropriate month
-        int startMonth = (monthChoice == 8) ? 6 : (monthChoice + 5);
-        int endMonth = (monthChoice == 8) ? 12 : (monthChoice + 5);
+        // HARDCODED: Process ALL months (June to December) immediately
+        int monthChoice = 8;
+        int startMonth = 6;
+        int endMonth = 12;
 
-        //Process data for selecting option for all employees
+        //Process data for selecting an option for all employees
         for (int empIndex = 0; empIndex < employeeCount; empIndex++) {
             printPayrollHeader(empIds[empIndex], empNames[empIndex],
                     empBirthdays[empIndex], monthChoice);
